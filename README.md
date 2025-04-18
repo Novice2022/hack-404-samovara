@@ -7,6 +7,8 @@
 ``` shell
 git clone https://github.com/Novice2022/hack-404-samovara.git
 
+cd hack-404-samovara
+
 git checkout -b dev
 git branch --set-upstream-to=origin/dev dev
 git pull
@@ -20,6 +22,8 @@ git pull
 
 ``` shell
 git clone https://github.com/Novice2022/hack-404-samovara.git
+
+cd hack-404-samovara
 
 git checkout -b dev
 git branch --set-upstream-to=origin/dev dev
