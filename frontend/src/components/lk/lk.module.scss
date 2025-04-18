@@ -1,3 +1,9 @@
+@mixin f-center-between{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .container{
     width: 80%;
     margin: 0 auto;
@@ -5,10 +11,11 @@
         font-size: calc(var(--index) * 2);
         line-height: 180%;
     }
+    h2{
+        font-size: calc(var(--index) * 1.2);
+    }
     .info{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        @include f-center-between();
         font-size: calc(var(--index) * 1);
         width: 50%;
         margin-top: calc(var(--index) * 1);
@@ -30,8 +37,7 @@
                 gap: calc(var(--index) * .3);
             } 
             &__linewrapper{
-                display: flex;
-                justify-content: space-between;
+                @include f-center-between();
             }
             &__label{
                 font-weight: bold;
@@ -56,6 +62,46 @@
                 color: var(--white-text);   
                 font-size: calc(var(--index) * 1);
                 background-color: var(--blue-btn);
+                border-radius: 5px;
+                padding: calc(var(--index) * .2) calc(var(--index) * .6);
+            }
+        }
+    }
+    .bids{
+        width: 80%;
+        margin: calc(var(--index) * 1) auto;
+        font-size: calc(var(--index) * .9);
+        .bid{
+            width: 100%;
+            border-radius: 5px;
+            box-shadow: #8689AC 0 2px 5px;
+            margin-bottom: calc(var(--index) * 1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            &__header{
+                @include f-center-between();
+                border-bottom: 1px solid #8689AC;
+                width: 100%;
+                padding: calc(var(--index) * .2) calc(var(--index) * .6);
+            }
+            &__info{
+                width: 100%;
+                padding: calc(var(--index) * .2) calc(var(--index) * .6);
+                &__wrapper{
+                    @include f-center-between();
+                    &__data{
+                        width: 70%;
+                    }
+                }
+            }
+            &__cancelBtn{
+                margin: calc(var(--index) * .5);
+                width: fit-content;
+                border: none;
+                color: var(--white-text);   
+                font-size: calc(var(--index) * 1);
+                background-color: var(--red-btn);
                 border-radius: 5px;
                 padding: calc(var(--index) * .2) calc(var(--index) * .6);
             }

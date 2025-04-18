@@ -109,6 +109,34 @@ const CreateBid = () => {
     );
 };
 
+const Bid = ({bid}) =>{
+    return(
+        <div className={s.bid}>
+            <div className={s.bid__header}>
+                <h3 className={s.bid__status}>{bid.status}</h3>
+                <h3 className={s.bid__fate}>{bid.createdAt}</h3>
+            </div>
+            <div className={s.bid__info}>
+                <div className={s.bid__info__wrapper}>
+                    <h4>Тип помощи</h4>
+                    <h4 className={s.bid__info__wrapper__data}>{bid.type}</h4>    
+                </div>
+                <div className={s.bid__info__wrapper}>
+                    <h4>Описание</h4>
+                    <h4 className={s.bid__info__wrapper__data}>{bid.description}</h4>    
+                </div>
+                <div className={s.bid__info__wrapper}>
+                    <h4>Адрес</h4>
+                    <h4 className={s.bid__info__wrapper__data}>{bid.from}</h4>    
+                </div>
+            </div>
+            {bid.status != "Выполнено" && (
+                <button className={s.bid__cancelBtn}>Отозвать заявку</button>
+            )}
+        </div>
+    )
+}
+
 const LkVeteran = () =>{
 
     const veteran = {
@@ -119,6 +147,22 @@ const LkVeteran = () =>{
         city: "Ржежопинск"
     }
 
+    const bids = [
+        {
+            type: 'Медицинская помощь',
+            description: 'Оторвало нахуй палец на ноге ребята помогите',
+            from: 'Тула, ул Ленина д 5 кв 1488',
+            status: 'Выполнено',
+            createdAt: '01-04-2025',
+        },
+        {
+            type: 'Медицинская помощь',
+            description: 'Оторвало нахуй ногу тут уже хз как поможете',
+            from: 'Тула, ул Ленина д 5 кв 1488',
+            status: 'В процессе',
+            createdAt: '10-04-2025',
+        }
+    ]
     return(
         <section className={s.container}>
             <h1>
@@ -132,6 +176,12 @@ const LkVeteran = () =>{
                 <h5 className={s.city}>{veteran.city}</h5>
             </div>
             <CreateBid />
+            <h2>История заявок</h2>
+            <div className={s.bids}>
+                {bids.map((item, key) =>(
+                    <Bid bid={item} key={key}/>
+                ))}
+            </div>
         </section>
     )
 }
