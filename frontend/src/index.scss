@@ -1,0 +1,24 @@
+:root{
+    --index: calc(1vw + 1vh);
+    --white-text:rgb(211, 211, 211);
+    --blue-btn: #3846e7;
+    --red-btn: #941b17;
+}
+
+body{
+    background-color: #f2f2f2;
+}
+
+button:disabled{
+    color: #000;
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+}
