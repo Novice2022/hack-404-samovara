@@ -49,21 +49,24 @@ const Registration = () => {
     //Хэшируем пароль
     const hashedPassword = SHA256(fields.pass.value).toString();;
 
+    //Временно храним данные о пользователе
+    const userData = {
+        firstName: fields.firstName.value,
+        lastName: fields.lastName.value,
+        login: fields.login.value,
+        passwordHash: hashedPassword,
+        phoneNumber: fields.phone.value,
+        cityResidence: fields.city.value,
+        role: userTypeNum
+      };
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setMessage('');
       
         try {
-          const userData = {
-            firstName: fields.firstName.value,
-            lastName: fields.lastName.value,
-            login: fields.login.value,
-            passwordHash: hashedPassword,
-            phoneNumber: fields.phone.value,
-            cityResidence: fields.city.value,
-            role: userTypeNum
-          };
+
           console.log(fields.login.value, hashedPassword)
           await registerUser(userData);
           setMessage({ text: 'Регистрация успешна! Войдите в систему', type: 'success' });
@@ -99,14 +102,14 @@ const Registration = () => {
       
           localStorage.setItem('authToken', token);
           localStorage.setItem('userData', JSON.stringify(user));
-          
           navigate('/lk', { 
             state: { 
               userType: userType,
-              justLoggedIn: true 
+              justLoggedIn: true ,
+              userInfo: userData
             }
           });
-      
+
         } catch (error) {
           setMessage({ text: error.message, type: 'error' });
         } finally {

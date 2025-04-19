@@ -14,7 +14,6 @@
     "bootstrap": "^5.3.5",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.4",
-    "bcryptjs": "^3.0.2",
     "crypto-js": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
