@@ -1,0 +1,334 @@
+// @mixin f-center-between{
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+// }
+
+// .container{
+//     width: 80%;
+//     margin: 0 auto;
+//     h1{
+//         font-size: calc(var(--index) * 2);
+//         line-height: 180%;
+//     }
+//     h2{
+//         font-size: calc(var(--index) * 1.2);
+//     }
+//     .info{
+//         @include f-center-between();
+//         font-size: calc(var(--index) * 1);
+//         width: 50%;
+//         margin: calc(var(--index) * 1) 0;
+//     }    
+//     .create{
+//         width: 100%;
+//         margin-top: calc(var(--index) * 2);
+//         &__title{
+//             font-size: calc(var(--index) * 1.2);
+//         }
+//         .form{
+//             width: 80%;
+//             margin: calc(var(--index) * 1) auto;
+//             font-size: calc(var(--index) * .9);
+//             &__wrapper{
+//                 display: flex;
+//                 flex-direction: column;
+//                 margin-top: calc(var(--index) * .7);
+//                 gap: calc(var(--index) * .3);
+//             } 
+//             &__linewrapper{
+//                 @include f-center-between();
+//             }
+//             &__label{
+//                 font-weight: bold;
+//             }   
+//             &__select,&__input,&__textarea{
+//                 color: #8689AC;
+//                 font-size: calc(var(--index) * .8);
+//                 padding: calc(var(--index) * .4) calc(var(--index) * .8);
+//                 background-color: transparent;
+//                 border: 1px solid #8689AC;
+//                 outline: none;
+//                 border-radius: 5px;
+//                 box-shadow: #8689AC 0px 1px 5px;
+//                 background-color: #f2f2f2;
+//             }
+//             &__textarea{
+//                 height: calc(var(--index) * 10);
+//                 resize: none;
+//             }
+//             .submitBtn{
+//                 margin-top: calc(var(--index) * 2);
+//                 border: none;
+//                 color: var(--white-text);   
+//                 font-size: calc(var(--index) * 1);
+//                 background-color: var(--blue-btn);
+//                 border-radius: 5px;
+//                 padding: calc(var(--index) * .2) calc(var(--index) * .6);
+//             }
+//         }
+//     }
+//     .bids{
+//         width: 80%;
+//         margin: calc(var(--index) * 1) auto;
+//         font-size: calc(var(--index) * .9);
+//         .bid{
+//             background-color: #f2f2f2;
+//             width: 100%;
+//             border-radius: 5px;
+//             box-shadow: #8689AC 0 2px 5px;
+//             margin-bottom: calc(var(--index) * 1);
+//             display: flex;
+//             flex-direction: column;
+//             align-items: flex-end;
+//             &__header{
+//                 @include f-center-between();
+//                 border-bottom: 1px solid #8689AC;
+//                 width: 100%;
+//                 padding: calc(var(--index) * .2) calc(var(--index) * .6);
+//             }
+//             &__info{
+//                 width: 100%;
+//                 padding: calc(var(--index) * .2) calc(var(--index) * .6);
+//                 &__wrapper{
+//                     @include f-center-between();
+//                     margin-bottom: calc(var(--index) * .5);
+//                     &__data{
+//                         width: 70%;
+//                     }
+//                 }
+//             }
+//             &__btns{
+//                 @include f-center-between();
+//             }
+//             &__btn{
+//                 margin: calc(var(--index) * .5);
+//                 width: fit-content;
+//                 border: none;
+//                 color: var(--white-text);   
+//                 font-size: calc(var(--index) * 1);
+//                 border-radius: 5px;
+//                 padding: calc(var(--index) * .2) calc(var(--index) * .6);
+//                 color: #f2f2f2;
+//             }
+//             &__cancelBtn{
+//                 background-color: var(--red-btn);
+//             }
+//             &__endBtn{
+//                 background-color: var(--green-btn);
+//             }
+//         }
+//     }
+// }
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+// Глобальные переменные
+$primary-color: #4CAF50; // Зеленый
+$red-color: #FF4D4D; // Красный
+$text-color: #333333;
+$input-bg-color: #FFFFFF;
+$shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1);
+
+.container {
+    max-width: calc(var(--index) * 50);
+    margin: 0 auto;
+    padding: calc(var(--index) * 1.5);
+    font-family: 'Roboto', sans-serif;
+
+    h1 {
+        font-size: calc(var(--index) * 1.4);
+        color: $text-color;
+        text-align: center;
+        margin-bottom: calc(var(--index) * 1.2);
+    }
+
+    h2 {
+        font-size: calc(var(--index) * 1.1);
+        color: $text-color;
+        margin-bottom: calc(var(--index) * 1);
+    }
+
+    .info {
+        @include flex-between;
+        background-color: $input-bg-color;
+        padding: calc(var(--index) * 1);
+        border-radius: calc(var(--index) * 0.4);
+        box-shadow: $shadow;
+        margin-bottom: calc(var(--index) * 2);
+
+        h4, h5 {
+            margin: 0;
+            color: $text-color;
+            font-size: calc(var(--index) * 0.8);
+        }
+    }
+
+    .create {
+        background-color: $input-bg-color;
+        padding: calc(var(--index) * 1.2);
+        border-radius: calc(var(--index) * 0.4);
+        box-shadow: $shadow;
+        margin-bottom: calc(var(--index) * 2);
+
+        &__title {
+            font-size: calc(var(--index) * 1);
+            color: $text-color;
+            text-align: center;
+            margin-bottom: calc(var(--index) * 1);
+        }
+
+        .form {
+            &__wrapper {
+                margin-bottom: calc(var(--index) * 1.2);
+
+                label {
+                    display: block;
+                    font-weight: bold;
+                    margin-bottom: calc(var(--index) * 0.4);
+                    color: $text-color;
+                    font-size: calc(var(--index) * 0.7);
+                }
+
+                input, textarea, select {
+                    width: 100%;
+                    padding: calc(var(--index) * 0.5);
+                    border: 1px solid #ddd;
+                    border-radius: calc(var(--index) * 0.3);
+                    font-size: calc(var(--index) * 0.6);
+                    transition: border-color 0.3s ease;
+
+                    &:focus {
+                        border-color: $primary-color;
+                    }
+                }
+
+                textarea {
+                    height: calc(var(--index) * 6);
+                    resize: none;
+                }
+            }
+
+            &__linewrapper {
+                @include flex-between;
+
+                > div {
+                    flex: 1;
+                    margin-right: calc(var(--index) * 0.8);
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+            .submitBtn {
+                @include flex-center;
+                background-color: $primary-color;
+                color: white;
+                padding: calc(var(--index) * 0.5) calc(var(--index) * 1);
+                border: none;
+                border-radius: calc(var(--index) * 0.3);
+                font-size: calc(var(--index) * 0.6);
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+
+                &:hover {
+                    background-color: darken($primary-color, 10%);
+                }
+            }
+        }
+    }
+
+    .bids {
+        .bid {
+            background-color: $input-bg-color;
+            padding: calc(var(--index) * 1);
+            border-radius: calc(var(--index) * 0.4);
+            box-shadow: $shadow;
+            margin-bottom: calc(var(--index) * 1);
+
+            &__header {
+                @include flex-between;
+                margin-bottom: calc(var(--index) * 0.6);
+
+                h3 {
+                    margin: 0;
+                    font-size: calc(var(--index) * 1);
+
+                    &.status {
+                        color: $primary-color;
+                    }
+
+                    &.fate {
+                        color: #888;
+                    }
+                }
+            }
+
+            &__info {
+                &__wrapper {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: calc(var(--index) * 0.4);
+
+                    h4 {
+                        margin: 0;
+                        color: $text-color;
+                        font-size: calc(var(--index) * 0.8);
+                    }
+                    &__data {
+                        color: #666;
+                        width: 80%
+                    }
+                }
+            }
+
+            &__btns {
+                @include flex-between;
+                margin-top: calc(var(--index) * 1.5);
+
+                .bid__btn {
+                    @include flex-center;
+                    padding: calc(var(--index) * 0.3) calc(var(--index) * 0.8);
+                    border: none;
+                    border-radius: calc(var(--index) * 0.3);
+                    font-size: calc(var(--index) * .8);
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+                .bid__cancelBtn {
+                    background-color: $red-color;
+                    color: white;
+
+                    &:hover {
+                        background-color: darken($red-color, 10%);
+                    }
+                }
+
+                .bid__endBtn {
+                    background-color: $primary-color;
+                    color: white;
+
+                    &:hover {
+                        background-color: darken($primary-color, 10%);
+                    }
+                }
+                // Кнопка "Откликнуться" справа
+                .bid__endBtn {
+                    margin-left: auto;
+                }
+            }
+        }
+    }
+}
