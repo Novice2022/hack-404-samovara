@@ -21,9 +21,9 @@ namespace Hakaton.Models
         public RequestStatus Status { get; set; }
         [Required]
         public DateTime CreateAt {  get; set; }
+        [Required]
+        public Guid VeteranId { get; set; }
         public Guid? SelectedExecutorId {  get; set; }
-        [ForeignKey("SelectedExecutorId")]
-        public virtual User SelectedExecutor {  get; set; }
     }
     public enum RequestType
     {

@@ -18,14 +18,12 @@ public class VeteranPersonalAccountController: Controller
 {
     private readonly HakatonDbContext _dbContext;
     private readonly ILogger<VeteranPersonalAccountController> _logger;
-    private readonly IJwtService _jwtService;
     private readonly IHostEnvironment _hostEnvironment; //for development status
 
     public VeteranPersonalAccountController(IJwtService jwtService, HakatonDbContext dbContext, ILogger<VeteranPersonalAccountController> logger, IHostEnvironment hostEnvironment)
     {
         _logger = logger;
         _dbContext = dbContext;
-        _jwtService = jwtService;
         _hostEnvironment = hostEnvironment;
     }
     
