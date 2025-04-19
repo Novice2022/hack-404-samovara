@@ -42,7 +42,7 @@ public class VeteranPersonalAccountController: Controller
                 LocationText = requestCreate.LocationText,
                 Status = RequestStatus.New,
                 CreateAt = DateTime.UtcNow,
-                SelectedExecutorId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value) //find current user from claims
+                VeteranId= Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value) //find current user from claims
             };
             _dbContext.Requests.Add(newRequest);
             await _dbContext.SaveChangesAsync();
@@ -62,40 +62,31 @@ public class VeteranPersonalAccountController: Controller
     {
         try
         {
-            // var requestQuery = _dbContext.Requests
-            //     .Join(_dbContext.Responses,
-            //         request => request.Guid,
-            //         respons => respons.RequestId,
-            //         (request, respons) => new
-            //         {
-            //             Request = request,
-            //             Respons = respons
-            //         }).AsQueryable();
+            var requests = _dbContext.Requests.Where(request => request.VeteranId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value)).ToList();
+
+            var responses = _dbContext.Responses
+                .Join(_dbContext.Users, response => response.VolonteerId,user => user.Id, (response, user) => new { response, user })
+                .Where(arg => arg.response.RequestId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))
+                .ToList();
             
-            // var requestQuery = _dbContext.Requests
-            //     .GroupJoin(_dbContext.Responses,
-            //         request => request.Guid,
-            //         response => response.RequestId,
-            //         (request, responses) => new { request, responses })
-            //     .SelectMany(
-            //         r => r.responses.DefaultIfEmpty(),
-            //         (r, response) => new
-            //         {
-            //             Request = r.request,
-            //             Response = response 
-            //         }
-            //     )
-            //     .ToList(); //Analog of left-join
-
-            var requests = _dbContext.Requests.ToList();
-            // var volunteers = _dbContext.Users
-            //     .Where(user => user.Role == UserRole.VOLUNTEER)
-            //     .Select(v => v.Id)
-            //     .ToList();
-
-            var responses = _dbContext.Responses.ToList();
-
-            var requestDtosList = requests.Select(req => new RequestDtos
+            List<ResponseVononteerForVeteransDtos>? Responses = new List<ResponseVononteerForVeteransDtos>();
+                
+            foreach (var response in responses)
+            {
+                    var resp = new ResponseVononteerForVeteransDtos()
+                    {
+                        Id = response.response.Id,
+                        VolonteerId = response.response.VolonteerId,
+                        FirstName = response.user.FirstName,
+                        LastName = response.user.LastName,
+                        ContactInfo = response.response.ContactInfo,
+                        CreateAt = response.response.CreateAt,
+                    };
+                    Responses.Add(resp);
+            }
+           
+        
+            var requestDtosList = requests.Select(req => new RequestForVetransDtos
             {
                 Guid = req.Guid,
                 Type = req.Type,
@@ -104,7 +95,7 @@ public class VeteranPersonalAccountController: Controller
                 LocationText = req.LocationText,
                 Status = req.Status,
                 CreateAt = req.CreateAt,
-                Responses = responses.Where(r => r.RequestId == req.Guid).ToList()
+                Responses = Responses
             }).ToList();
             
             //Сортировка по статусу
@@ -131,7 +122,7 @@ public class VeteranPersonalAccountController: Controller
             }
 
             //Выбор по какому столбцу будем соритровать
-            Func<RequestDtos, object> selectorKey = filterRequest?.ColumnOrder?.ToLower() switch
+            Func<RequestForVetransDtos, object> selectorKey = filterRequest?.ColumnOrder?.ToLower() switch
             {
                 "type" => requestDtosList => requestDtosList.Type,
                 "experience" => requestDtosList => requestDtosList.Status,
