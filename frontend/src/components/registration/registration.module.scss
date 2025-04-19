@@ -168,4 +168,36 @@ main{
             }
         }
     }
+
+    /*регистрация*/
+    .container{
+        .frame{
+            width: 90vw;
+            .controls{
+                width: 80%;
+                &__wrapper{
+                    button{
+                        font-size: calc(var(--index) * 2);
+                    }
+                }
+            }
+            form{
+                width: 90%;
+                margin: calc(var(--index) * 2) auto;
+                .form__wrapper{
+                    margin-top: calc(var(--index) * 3);
+                    .form__input{
+                        font-size: calc(var(--index) * 2);
+                    }
+                    .form__label{
+                        font-size: calc(var(--index) * 1.2);
+                    }
+                }
+                .form__submit{
+                    font-size: calc(var(--index) * 2);
+                    padding: calc(var(--index) * 0.6) calc(var(--index) * 2);
+                }
+            }
+        }
+    }
 }
