@@ -1,6 +1,6 @@
 @mixin flex {
     display: flex;
-    gap: calc(var(--index) * .5);
+    gap: calc(var(--index) * 1);
 }
 
 @mixin flex-column {
@@ -10,13 +10,15 @@
 }
 
 @mixin flex-center {
-    display: flex;
+    @include flex;
+
     align-items: center;
     justify-content: center;
 }
 
 @mixin flex-between {
-    display: flex;
+    @include flex;
+
     align-items: center;
     justify-content: space-between;
 }
@@ -44,7 +46,6 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
         font-size: calc(var(--index) * 1.1);
         color: $text-color;
         margin: 0;
-        // margin-bottom: calc(var(--index) * 1);
     }
 
     .info {
@@ -76,7 +77,6 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
             font-size: calc(var(--index) * 1);
             color: $text-color;
             text-align: center;
-            // margin-bottom: calc(var(--index) * 1);
         }
 
         .form {
@@ -86,54 +86,50 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
                 label {
                     display: block;
                     font-weight: bold;
-                    margin-bottom: calc(var(--index) * 0.4);
                     color: $text-color;
                     font-size: calc(var(--index) * 0.7);
-                }
-
-                input, textarea, select {
-                    width: 100%;
-                    padding: calc(var(--index) * 0.5);
-                    border: 1px solid #ddd;
-                    border-radius: calc(var(--index) * 0.3);
-                    font-size: calc(var(--index) * 0.6);
-                    transition: border-color 0.3s ease;
-                }
-
-                textarea {
-                    height: calc(var(--index) * 6);
+                    padding-left: calc(var(--index) * 0.25);;
+                    margin-bottom: calc(var(--index) * 0.2);
                 }
             }
 
-            &__linewrapper {
-                @include flex-between;
-
-                align-items: end;
-
-                > div {
-                    flex: 1;
-                    margin-right: calc(var(--index) * 0.8);
-
-                    &:last-child {
-                        margin-right: 0;
+            @media screen and (max-width: 1920px) {
+                &__wrapper {
+                    input, textarea, select {
+                        width: 100%;
+                        border: 1px solid #ddd;
+                        transition: border-color 0.3s ease;
                     }
                 }
+
+                &__linewrapper {
+                    @include flex-between;
+
+                    align-items: end;
+                }
             }
 
-            .submitBtn {
-                @include flex-center;
+            @media screen and (max-width: 1000px) {
+                &__wrapper {
+                    label {
+                        display: block;
+                        font-weight: bold;
+                        color: $text-color;
+                    }
+    
+                    input, textarea, select {
+                        width: 100%;
+                        border: 1px solid #ddd;
+                        transition: border-color 0.3s ease;
+                    }
+                }
 
-                background-color: $primary-color;
-                color: white;
-                padding: calc(var(--index) * 0.5) calc(var(--index) * 1);
-                border: none;
-                border-radius: calc(var(--index) * 0.3);
-                font-size: calc(var(--index) * 0.6);
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-
-                &:hover {
-                    background-color: darken($primary-color, 10%);
+                &__linewrapper {
+                    @include flex-column;
+                    
+                    > div {
+                        width: 100%;
+                    }
                 }
             }
         }

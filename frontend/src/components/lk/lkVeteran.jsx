@@ -120,16 +120,13 @@ const Bid = ({bid, bidType}) =>{
                     <h4>Адрес</h4>
                     <h4 className={s.bid__info__wrapper__data}>{bid.from}</h4>    
                 </div>
-
             </div>
-            
             {bid.status != "Завершена" && bidType == "veteran" && (
                 <div className={s.bid__btns}>
                     <button className={s.bid__cancelBtn + ' ' + s.bid__btn}>Отозвать заявку</button>
                     <button className={s.bid__endBtn + ' ' + s.bid__btn}>Завершить</button>
                 </div>
             )}
-            
             {bid.status == "Новая" && bidType == "volunteer" && (
                 <div className={s.bid__btns}>
                     <button className={s.bid__endBtn + ' ' + s.bid__btn}>Откликнуться</button>

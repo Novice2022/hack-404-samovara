@@ -27,3 +27,7 @@ a{
 .p-dropdown {
     width: 100%;
 }
+
+* {
+    font-size: calc(var(--index) * 0.75);
+}
