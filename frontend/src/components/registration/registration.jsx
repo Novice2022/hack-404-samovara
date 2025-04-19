@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import s from './registration.module.scss'
 import { loginValidationRules, registerValidationRules, validateForm } from './validation';
 import { registerUser } from '../../api/api';
+import axios from 'axios';
 
 const Registration = () => {
     //получения флага с стартовой страницы
@@ -122,6 +123,39 @@ const Registration = () => {
         </div>
     );
 
+
+    // Определяем город при монтировании компонента
+    const [isGeoLoading, setIsGeoLoading] = useState(false);
+    const [geoError, setGeoError] = useState(null);
+  
+    useEffect(() => {
+      const fetchUserLocation = async () => {
+        setIsGeoLoading(true);
+        setGeoError(null);
+        
+        try {
+          // Используем бесплатный API с CORS поддержкой
+          const response = await axios.get('https://get.geojs.io/v1/ip/geo.json');
+          
+          if (response.data.city) {
+            setFields(prev => ({
+              ...prev,
+              city: { ...prev.city, value: response.data.city }
+            }));
+          }
+        } catch (error) {
+          console.error('Не удалось определить местоположение:', error);
+          setGeoError('Не удалось определить город автоматически');
+          // Можно установить город по умолчанию:
+          // setFields(prev => ({...prev, city: { ...prev.city, value: 'Москва' }}));
+        } finally {
+          setIsGeoLoading(false);
+        }
+      };
+  
+      fetchUserLocation();
+    }, []);
+
     // ▄███████▀▀▀▀▀▀███████▄
     // ░▐████▀▒ЗАПУСКАЕМ▒▀██████▄
     // ░███▀▒▒▒▒▒ДЯДЮ▒▒▒▒▒▒▀█████
@@ -142,7 +176,7 @@ const Registration = () => {
     return (
         <div className={s.container}>
             <h1>Регистрация {userTypeRu}</h1>
-            <div className={s.frame}>
+             <div className={s.frame}>
                 {/* Кнопки для переключения между кнопками */}
                 <div className={s.controls}>
                     <div className={s.controls__wrapper}>
