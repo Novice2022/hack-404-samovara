@@ -47,7 +47,7 @@ public class VeteranPersonalAccountController: Controller
             _dbContext.Requests.Add(newRequest);
             await _dbContext.SaveChangesAsync();
             
-            return Ok(new RequestCreateDtos{Type = newRequest.Type, Description = newRequest.Description, City = newRequest.City, LocationText = newRequest.LocationText});
+            return Ok(new {RequestId = newRequest.Guid});
         }
         catch (Exception ex)
         {
@@ -58,7 +58,7 @@ public class VeteranPersonalAccountController: Controller
 
     //REFACTOR THIS LATER AFTER CREATE RESPONSE!!! if it needs
     [HttpGet("requests/")]
-    public async Task<IActionResult> GetRequests([FromQuery] FilterRequestContracts? filterRequest)
+    public async Task<IActionResult> GetRequests([FromQuery] FilterRequestContracts_ForVeterans? filterRequest)
     {
         try
         {
@@ -120,12 +120,13 @@ public class VeteranPersonalAccountController: Controller
                     .Where(r => r.CreateAt == filterRequest.createdAt)
                     .ToList();
             }
+            
 
             //Выбор по какому столбцу будем соритровать
             Func<RequestForVetransDtos, object> selectorKey = filterRequest?.ColumnOrder?.ToLower() switch
             {
                 "type" => requestDtosList => requestDtosList.Type,
-                "experience" => requestDtosList => requestDtosList.Status,
+                "statuc" => requestDtosList => requestDtosList.Status,
                 "income_date" => requestDtosList => requestDtosList.CreateAt,
                 "responses" => requestDtosList => requestDtosList.Responses!.Count,
                 _ => requestDtosList => requestDtosList.Guid
@@ -168,7 +169,7 @@ public class VeteranPersonalAccountController: Controller
         }
     }
     
-
+    
     [HttpGet("ShowClaims")]
     public async Task<IActionResult> ShowClaims()
     {
