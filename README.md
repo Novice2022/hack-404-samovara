@@ -65,10 +65,9 @@ cd ./backend/Hackaton/
 
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.0
 nano Hakaton.csproj  # Заменяем в строке <TargetFramework>net9.0</TargetFramework> версию на 8.0
-
 ```
 
-Копируем файл appsettings.json в папку Hackaton.
+Копируем файл `appsettings.json` в папку Hackaton.
 
 ``` shell
 dotnet run --urls="http://0.0.0.0:5000"
