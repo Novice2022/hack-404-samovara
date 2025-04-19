@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import s from './registration.module.scss'
 import { loginValidationRules, registerValidationRules, validateForm } from './validation';
-import { registerUser } from '../../api/api';
+import { registerUser, loginUser } from '../../api/api';
 import axios from 'axios';
+import { SHA256 } from 'crypto-js';
 
 const Registration = () => {
     //получения флага с стартовой страницы
     const location = useLocation();
     const navigate = useNavigate();
     const userType = location.state?.userType;
-    const userTypeRu = userType === "veteran" ? "ветерана" : "волонтера";
+    const userTypeNum = userType === "veteran" ? 1 : 2;
   
     const [active, setActive] = useState(false);
     const handleActive = () => {
@@ -28,6 +29,7 @@ const Registration = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [serverError, setServerError] = useState(null);
+    const [message, setMessage] = useState({ text: '', type: '' });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,61 +46,74 @@ const Registration = () => {
         }));
     };
 
-    const handleBlur = (name) => {
-        // Валидация при потере фокуса
-        const rules = active ? registerValidationRules : loginValidationRules;
-        if (rules[name]) {
-            const error = validateField(name, fields[name].value, rules[name], fields);
-            setErrors(prev => ({ ...prev, [name]: error }));
-        }
-    };
+    //Хэшируем пароль
+    const hashedPassword = SHA256(fields.pass.value).toString();;
 
-    const handleSubmit = async (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
-        const { isValid, errors: validationErrors } = validateForm(fields, active);
-        setErrors(validationErrors);
-    
-        if (!isValid) return;
-    
         setIsLoading(true);
-        setServerError(null);
-    
+        setMessage('');
+      
         try {
-          if (active) {
-            // Данные для регистрации
-            const userData = {
-              firstName: fields.firstName.value,
-              lastName: fields.lastName.value,
-              login: fields.login.value,
-              passwordHash: fields.pass.value,
-              phoneNumber: fields.phone.value,
-              cityResidence: fields.city.value,
-              role: userType // берем из location.state
-            };
-    
-            await registerUser(userData);
-            navigate('/lk', { state: { userType } }); // Перенаправляем после успешной регистрации
-          } else {
-            // Логика для входа
-            try {
-              const credentials = {
-                login: fields.login.value,
-                password: fields.pass.value
-              };
-              const userData = await loginUser(credentials);
-              // Сохраняем токен или другие данные
-              navigate('/lk', { state: { userType } });
-            } catch (error) {
-              setServerError(error.message || 'Неверный логин или пароль');
-            }
-          }
+          const userData = {
+            firstName: fields.firstName.value,
+            lastName: fields.lastName.value,
+            login: fields.login.value,
+            passwordHash: hashedPassword,
+            phoneNumber: fields.phone.value,
+            cityResidence: fields.city.value,
+            role: userTypeNum
+          };
+          console.log(fields.login.value, hashedPassword)
+          await registerUser(userData);
+          setMessage({ text: 'Регистрация успешна! Войдите в систему', type: 'success' });
+          setActive(false); // Переключаем на форму входа
+          
+          // Очищаем только пароли (логин остается)
+          setFields(prev => ({
+            ...prev,
+            pass: { value: '', isFocused: false },
+            pass2: { value: '', isFocused: false }
+          }));
+      
         } catch (error) {
-          console.error('Ошибка регистрации:', error);
-          setServerError(error.message || 'Произошла ошибка при регистрации');
+          setMessage({ text: error.message, type: 'error' });
         } finally {
           setIsLoading(false);
         }
       };
+      
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setMessage('');
+      
+        try {
+            console.log(fields.login.value, hashedPassword)
+          const { token, user } = await loginUser({
+            login: fields.login.value,
+            passwordHash: hashedPassword
+          });
+
+          
+      
+          localStorage.setItem('authToken', token);
+          localStorage.setItem('userData', JSON.stringify(user));
+          
+          navigate('/lk', { 
+            state: { 
+              userType: userType,
+              justLoggedIn: true 
+            }
+          });
+      
+        } catch (error) {
+          setMessage({ text: error.message, type: 'error' });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
 
     // Рендер поля с ошибкой
     const renderField = (name, label, type = 'text') => (
@@ -111,7 +126,6 @@ const Registration = () => {
                 value={fields[name]?.value || ''}
                 onChange={handleChange}
                 onFocus={() => handleFocus(name)}
-                onBlur={() => handleBlur(name)}
             />
             <label
                 className={`${s.form__label} ${fields[name]?.isFocused || fields[name]?.value ? s.form__label_focused : ''}`}
@@ -146,8 +160,6 @@ const Registration = () => {
         } catch (error) {
           console.error('Не удалось определить местоположение:', error);
           setGeoError('Не удалось определить город автоматически');
-          // Можно установить город по умолчанию:
-          // setFields(prev => ({...prev, city: { ...prev.city, value: 'Москва' }}));
         } finally {
           setIsGeoLoading(false);
         }
@@ -175,7 +187,6 @@ const Registration = () => {
 
     return (
         <div className={s.container}>
-            <h1>Регистрация {userTypeRu}</h1>
              <div className={s.frame}>
                 {/* Кнопки для переключения между кнопками */}
                 <div className={s.controls}>
@@ -192,116 +203,13 @@ const Registration = () => {
                 {/* Форма входа */}
 
                 {!active ? (
-                    // <form action="">
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="login" 
-                    //             id="login" 
-                    //             type="text" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Логин</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="pass" 
-                    //             id="pass" 
-                    //             type="password" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="pass">Пароль</label>
-                    //     </div>
-                    //     <button className={s.form__submit} onClick={clickSubmit}>Войти</button>
-                    // </form>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleLogin}>
                         {renderField('login', 'Логин')}
                         {renderField('pass', 'Пароль', 'password')}
                         <button type="submit" className={s.form__submit}>Войти</button>
                     </form>
                 ) : (
-                    // <form action="">
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="firstName" 
-                    //             id="firstName" 
-                    //             type="text" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Имя</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="lastName" 
-                    //             id="lastName" 
-                    //             type="text" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Фамилия</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="login" 
-                    //             id="login" 
-                    //             type="text" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Логин</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="pass" 
-                    //             id="pass" 
-                    //             type="password" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="pass">Пароль</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="pass2" 
-                    //             id="pass2" 
-                    //             type="password" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="pass">Подтвержение пароля</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="phone" 
-                    //             id="phone" 
-                    //             type="phone" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Телефон</label>
-                    //     </div>
-                    //     <div className={s.form__wrapper}>
-                    //         <input 
-                    //             className={s.form__input} 
-                    //             name="login" 
-                    //             id="login" 
-                    //             type="text" 
-                    //             onChange={handleChange}
-                    //              />
-                    //         <label className={s.form__label} htmlFor="login">Город</label>
-                    //     </div>
-                    //     <button className={s.form__submit} onClick={clickSubmit}>
-                    //     <Link 
-                    //         to="/lk" 
-                    //         state={{ userType: userType}}
-                    //     >
-                    //         Зарегистрироваться
-                    //     </Link>
-                    //     </button>
-                    // </form>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleRegister}>
                         {renderField('firstName', 'Имя')}
                         {renderField('lastName', 'Фамилия')}
                         {renderField('login', 'Логин')}
@@ -310,9 +218,9 @@ const Registration = () => {
                         {renderField('phone', 'Телефон', 'tel')}
                         {renderField('city', 'Город')}
                         <button type="submit" className={s.form__submit}>
-                            <Link to="/lk" state={{ userType }} className={s.form__link}>
+                            {/* <Link to="/lk" state={{ userType }} className={s.form__link}> */}
                                 Зарегистрироваться
-                            </Link>
+                            {/* </Link> */}
                         </button>
                     </form>
                 )}
