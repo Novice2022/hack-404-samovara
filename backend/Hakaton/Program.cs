@@ -37,7 +37,13 @@ namespace Hakaton
                 };
             });
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .ConfigureApplicationPartManager(apm =>
+                {
+                    Console.WriteLine("=== Registered Controller Assemblies ===");
+                    foreach (var part in apm.ApplicationParts)
+                        Console.WriteLine(part.Name);
+                });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -76,10 +82,21 @@ namespace Hakaton
             builder.Services.AddSingleton<IJwtService, JwtService>();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
+            
+            builder.Services.AddCors(option =>
+            {
+                option.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173");
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                });
+            });
+
 
 
             var app = builder.Build();
-
+            
             using var scope = app.Services.CreateScope();
             using var dbContext = scope.ServiceProvider.GetRequiredService<HakatonDbContext>();
             dbContext.Database.EnsureCreatedAsync();
@@ -94,7 +111,8 @@ namespace Hakaton
             app.UseAuthorization();
 
             app.MapControllers();
-
+            
+            app.UseCors();
             app.Run();
         }
     }

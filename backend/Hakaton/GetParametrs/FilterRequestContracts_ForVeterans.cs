@@ -3,7 +3,7 @@ using Hakaton.Models;
 
 namespace Hakaton.GetParametrs;
 
-public record FilterRequestContracts(
+public record FilterRequestContracts_ForVeterans(
     string? ColumnOrder,
     [MinLength(3)]
     [MaxLength(4)]
