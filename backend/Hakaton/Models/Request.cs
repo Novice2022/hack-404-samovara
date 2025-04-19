@@ -22,6 +22,8 @@ namespace Hakaton.Models
         [Required]
         public DateTime CreateAt {  get; set; }
         public Guid? SelectedExecutorId {  get; set; }
+        [ForeignKey("SelectedExecutorId")]
+        public virtual User SelectedExecutor {  get; set; }
     }
     public enum RequestType
     {

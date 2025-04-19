@@ -12,10 +12,11 @@ namespace Hakaton.Services
         private readonly string? _issuer;
         private readonly string? _audience;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(SymmetricSecurityKey securityKey, IConfiguration configuration)
         {
-            byte[]? key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
-            _securityKey = new SymmetricSecurityKey(key);
+            // byte[]? key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
+            // _securityKey = new SymmetricSecurityKey(key);
+            _securityKey = securityKey;
             _issuer = configuration["Jwt:Issuer"];
             _audience = configuration["Jwt:Audience"];
         }
