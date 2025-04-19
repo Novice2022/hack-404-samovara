@@ -20,8 +20,9 @@ public class RequestForVetransDtos
     public RequestStatus Status { get; set; }
     [Required]
     public DateTime CreateAt {  get; set; }
-
-    public List<ResponseVononteerForVeteransDtos>? Responses = new List<ResponseVononteerForVeteransDtos>();
+    [Required]
+    public List<ResponseVononteerForVeteransDtos> Responses {get; set; }
+    public Guid? SelectedExecutorId { get; set; }
 }
 
 public class ResponseVononteerForVeteransDtos

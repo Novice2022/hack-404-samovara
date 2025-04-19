@@ -62,30 +62,25 @@ public class VeteranPersonalAccountController: Controller
     {
         try
         {
-            var requests = _dbContext.Requests.Where(request => request.VeteranId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value)).ToList();
-
-            var responses = _dbContext.Responses
-                .Join(_dbContext.Users, response => response.VolonteerId,user => user.Id, (response, user) => new { response, user })
-                .Where(arg => arg.response.RequestId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))
+            // Получаем все заявки ветерана
+            var requests = _dbContext.Requests
+                .Where(request => request.VeteranId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))
                 .ToList();
-            
-            List<ResponseVononteerForVeteransDtos>? Responses = new List<ResponseVononteerForVeteransDtos>();
-                
-            foreach (var response in responses)
-            {
-                    var resp = new ResponseVononteerForVeteransDtos()
-                    {
-                        Id = response.response.Id,
-                        VolonteerId = response.response.VolonteerId,
-                        FirstName = response.user.FirstName,
-                        LastName = response.user.LastName,
-                        ContactInfo = response.response.ContactInfo,
-                        CreateAt = response.response.CreateAt,
-                    };
-                    Responses.Add(resp);
-            }
-           
-        
+
+// Получаем все ответы + пользователей, чьи заявки входят в этот список
+            var responsesWithUsers = _dbContext.Responses
+                .Where(r => requests.Select(req => req.Guid).Contains(r.RequestId))
+                .Join(_dbContext.Users,
+                    response => response.VolonteerId,
+                    user => user.Id,
+                    (response, user) => new { response, user })
+                .ToList();
+
+// Группируем по ID заявки
+            var responsesLookup = responsesWithUsers
+                .ToLookup(x => x.response.RequestId);
+
+// Формируем DTO-шки
             var requestDtosList = requests.Select(req => new RequestForVetransDtos
             {
                 Guid = req.Guid,
@@ -95,7 +90,17 @@ public class VeteranPersonalAccountController: Controller
                 LocationText = req.LocationText,
                 Status = req.Status,
                 CreateAt = req.CreateAt,
-                Responses = Responses
+                SelectedExecutorId = req.SelectedExecutorId,
+                Responses = responsesLookup[req.Guid]
+                    .Select(resp => new ResponseVononteerForVeteransDtos
+                    {
+                        Id = resp.response.Id,
+                        VolonteerId = resp.response.VolonteerId,
+                        FirstName = resp.user.FirstName,
+                        LastName = resp.user.LastName,
+                        ContactInfo = resp.user.PhoneNumber,
+                        CreateAt = resp.response.CreateAt
+                    }).ToList()
             }).ToList();
             
             //Сортировка по статусу
@@ -126,8 +131,8 @@ public class VeteranPersonalAccountController: Controller
             Func<RequestForVetransDtos, object> selectorKey = filterRequest?.ColumnOrder?.ToLower() switch
             {
                 "type" => requestDtosList => requestDtosList.Type,
-                "statuc" => requestDtosList => requestDtosList.Status,
-                "income_date" => requestDtosList => requestDtosList.CreateAt,
+                "status" => requestDtosList => requestDtosList.Status,
+                "createAt" => requestDtosList => requestDtosList.CreateAt,
                 "responses" => requestDtosList => requestDtosList.Responses!.Count,
                 _ => requestDtosList => requestDtosList.Guid
             };
@@ -136,7 +141,7 @@ public class VeteranPersonalAccountController: Controller
             requestDtosList = filterRequest?.OrderByType == "desc" ? requestDtosList.OrderByDescending(selectorKey).ToList() : requestDtosList.OrderBy(selectorKey).ToList();
 
             
-            return Ok(requestDtosList);
+            return Ok(new { requests = requestDtosList});
         }
         catch (Exception ex)
         {
@@ -157,15 +162,61 @@ public class VeteranPersonalAccountController: Controller
                 return NotFound(new { message = "Request not found" });
             }
             
-            _dbContext.Requests.Remove(request);
+            request.Status = RequestStatus.Cancelled;
+            // _dbContext.Requests.Remove(request);
+            _dbContext.Requests.Update(request);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new { message = "Request successfully deleted" });
+            return Ok(new { Id = request.Guid });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while deleting the request.");
             return StatusCode(500, new { message = "An error occurred while deleting the request", details = ex.Message });
+        }
+    }
+    
+    [HttpPost("requests/selectvolunteer/")]
+    public async Task<IActionResult> AcceptResponse(Guid responseId)
+    {
+        try
+        {
+            Guid veteranId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var request_response = _dbContext.Requests
+                .Join(_dbContext.Responses,
+                    req => req.Guid,
+                    res => res.RequestId,
+                    (req, res) => new { req, res }
+                    )
+                .Where(rr => rr.res.Id == responseId).ToList();
+            
+            var request = request_response.Select(rr => rr.req).ToList().FirstOrDefault();
+            
+            if (request == null)
+            {
+                return NotFound($"Request with Guid {responseId} not found.");
+            }
+            
+            var VolunteerUse = request_response
+                .Join(_dbContext.Users,
+                    arg => arg.res.VolonteerId,
+                    user => user.Id,
+                    (arg, user) => new { arg, user })
+                .Select(vol => vol.user.Id).FirstOrDefault();
+            
+            request.Status = RequestStatus.InProgress; 
+            request.SelectedExecutorId = VolunteerUse;
+            
+            _dbContext.Requests.Update(request);
+            await _dbContext.SaveChangesAsync();
+            
+            return Ok(new {Id = request.SelectedExecutorId});
+            
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while create response by the volunteer.");
+            return BadRequest(500);
         }
     }
     

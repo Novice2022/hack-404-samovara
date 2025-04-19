@@ -66,7 +66,7 @@ public class VolunteerPersonalAccountController : ControllerBase
             {
                 "type" => requests => requests.Type,
                 "status" => requests => requests.Status,
-                "income_date" => requests => requests.CreateAt,
+                "createAt" => requests => requests.CreateAt,
                 _ => requests => requests.Guid
             };
 
@@ -105,19 +105,29 @@ public class VolunteerPersonalAccountController : ControllerBase
     {
         try
         {
-            var request = await _dbContext.Requests.FindAsync(request_id.Guid);
-            
-            if (request == null)
+            // var request = await _dbContext.Requests.FindAsync(request_id.Guid);
+            //
+            // if (request == null)
+            // {
+            //     return NotFound($"Request with Guid {request_id.Guid} not found.");
+            // }
+            //
+            // request.Status = RequestStatus.InProgress; 
+            // request.SelectedExecutorId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            Guid currentIdUser = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var contactInfo = _dbContext.Users.Where(user => user.Id == currentIdUser).Select(user => user.PhoneNumber).First();
+            Response response = new Response()
             {
-                return NotFound($"Request with Guid {request_id.Guid} not found.");
-            }
-
-            request.Status = RequestStatus.InProgress; 
-            request.SelectedExecutorId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
+                Id = Guid.NewGuid(),
+                VolonteerId = currentIdUser,
+                RequestId = request_id.Guid,
+                ContactInfo = contactInfo,
+                CreateAt = DateTime.UtcNow,
+            };
+            _dbContext.Responses.Add(response);
             await _dbContext.SaveChangesAsync();
 
-            return Ok("Response created.");
+            return Ok(new {Id = response.Id});
             
         }
         catch (Exception ex)
@@ -127,15 +137,17 @@ public class VolunteerPersonalAccountController : ControllerBase
         }
     }
     
-    [HttpPost("VolunteerPersonalAccount/responses")]
+    [HttpGet("VolunteerPersonalAccount/responses")]
     public async Task<IActionResult> GetRequestByVolunteerId()
     {
         try
         {
+            List<Guid> requestID = _dbContext.Responses
+                .Where(response => response.VolonteerId == Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!))
+                .Select(response => response.RequestId).ToList();
             var requests = _dbContext.Requests.Join(_dbContext.Users, 
                     request => request.VeteranId, user => user.Id, (request, user) => new { request, user })
-                .Where(request => request.request.Status == RequestStatus.InProgress 
-                                  && request.request.SelectedExecutorId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))
+                .Where(request => requestID.Contains(request.request.Guid) )
                 .ToList();
         
             var requestDtosList = requests.Select(request => new RequestForVolunteersDtos
