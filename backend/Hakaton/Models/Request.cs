@@ -14,9 +14,9 @@ namespace Hakaton.Models
         [MaxLength(4000)]
         public string Description { get; set; }
         [Required]
-        public string City { get; set; } //Город
+        public string City { get; set; } 
         [Required]
-        public string LocationText { get; set; } //Адрес
+        public string LocationText { get; set; }
         [Required]
         public RequestStatus Status { get; set; }
         [Required]

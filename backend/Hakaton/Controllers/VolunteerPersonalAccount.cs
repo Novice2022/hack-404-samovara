@@ -5,6 +5,7 @@ using Hakaton.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Hakaton.Controllers
 {
@@ -25,41 +26,176 @@ namespace Hakaton.Controllers
         {
             try
             {
-                // Получаем активные заявки из базы данных
-                var activeRequests = await _dbContext.Requests()
-                    .Where(r => r.Status == 1) // Фильтруем только новые заявки
-                    .Select(r => new Models.Request
+                var requests = await _dbContext.Requests
+                    .Join(
+                        _dbContext.Users,
+                        request => request.VeteranId,
+                        user => user.Id,
+                        (request, user) => new RequestDtoVolunteerController
+                        {
+                            Id = request.Guid,
+                            Type = request.Type,
+                            Description = request.Description,
+                            City = request.City,
+                            LocationText = request.LocationText,
+                            Status = request.Status,
+                            CreateAt = request.CreateAt,
+                            Veteran = new VeteranDtoVolunteerController
+                            {
+                                Id = user.Id,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                PhoneNumber = user.PhoneNumber,
+                                CityResidence = user.CityResidence
+                            },
+                            SelectedExecutorId = request.SelectedExecutorId
+                        }
+                    )
+                    .Where(r => r.Veteran != null)
+                    .ToListAsync();
+
+                return Ok(requests);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        public async Task<IActionResult> RespondToRequest(
+            [FromRoute] Guid request_id,
+            [FromBody] ResponseRequestDtoVolunteerController responseRequestDto)
+        {
+            try
+            {
+                var request = await _dbContext.Requests
+                    .FirstOrDefaultAsync(r => r.Guid == request_id);
+
+                if (request == null)
+                {
+                    return NotFound("Заявка не найдена.");
+                }
+
+                if (request.Status != RequestStatus.New)
+                {
+                    return BadRequest("Отклик возможен только на новые заявки.");
+                }
+
+                var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value).ToString();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Не удалось определить пользователя.");
+                }
+
+                var volunteerId = Guid.Parse(userId);
+
+                Response response = new Response()
+                {
+                    Id = Guid.NewGuid(),
+                    RequestId = request_id,
+                    ContactInfo = responseRequestDto.ContactInfo,
+                    VolonteerId = volunteerId,
+                    CreateAt = DateTime.UtcNow
+                };
+
+                await _dbContext.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpGet("requests/filter")]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> FilterRequests(
+        [FromQuery] int? type,
+        [FromQuery] string city)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(city))
+                {
+                    return BadRequest("Параметр 'city' обязателен.");
+                }
+
+                var query = _dbContext.Requests
+                    .Join(
+                        _dbContext.Users,
+                        request => request.VeteranId,
+                        user => user.Id,
+                        (request, user) => new
+                        {
+                            request.Guid,
+                            request.Type,
+                            request.Description,
+                            request.City,
+                            request.LocationText,
+                            request.Status,
+                            request.CreateAt,
+                            Veteran = new
+                            {
+                                user.Id,
+                                Name = $"{user.FirstName} {user.LastName}",
+                                ContactInfo = user.PhoneNumber,
+                                CityResidence = user.CityResidence
+                            },
+                            request.SelectedExecutorId
+                        }
+                    )
+                    .Where(r => r.City == city); // Фильтруем по городу
+
+                // Если указан тип помощи, добавляем фильтр по типу
+                if (type.HasValue)
+                {
+                    query = query.Where(r => r.Type == type.Value);
+                }
+
+                // Получаем отфильтрованные заявки
+                var requests = await query
+                    .Select(r => new RequestDtoVolunteerController
                     {
-                        Id = r.Id,
+                        Id = r.Guid,
                         Type = r.Type,
                         Description = r.Description,
                         City = r.City,
                         LocationText = r.LocationText,
                         Status = r.Status,
-                        CreatedAt = r.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        CreatedAt = r.CreateAt.ToString("yyyy-MM-ddTHH:mm:ss"),
                         Veteran = new VeteranDto
                         {
                             Id = r.Veteran.Id,
-                            VolonteerId = r.Veteran.VolonteerId,
-                            FirstNameVolonteer = r.Veteran.FirstNameVolonteer,
-                            LastNameVolonteer = r.Veteran.LastNameVolonteer,
+                            Name = r.Veteran.Name,
                             ContactInfo = r.Veteran.ContactInfo,
-                            ResponseDate = r.Veteran.ResponseDate.ToString("yyyy-MM-ddTHH:mm:ss")
+                            CityResidence = r.Veteran.CityResidence
                         },
                         SelectedExecutorId = r.SelectedExecutorId
                     })
                     .ToListAsync();
 
-                return Ok(activeRequests);
+                // Формируем ответ
+                var response = new FilteredRequestsResponse
+                {
+                    Requests = requests
+                };
+
+                return Ok(response);
             }
             catch (UnauthorizedAccessException)
             {
-                // Возвращаем ошибку авторизации
                 return Unauthorized();
             }
             catch (Exception ex)
             {
-                // Логируем ошибку (в реальном проекте используйте логгер)
                 return StatusCode(500, "Internal server error");
             }
         }
