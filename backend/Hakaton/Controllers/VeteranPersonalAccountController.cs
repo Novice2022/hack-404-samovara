@@ -164,7 +164,6 @@ public class VeteranPersonalAccountController: Controller
 
             if (request == null)
             {
-                //Если запрос не найден, возвращаем 404
                 return NotFound(new { message = "Request not found" });
             }
             
