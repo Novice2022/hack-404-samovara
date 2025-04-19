@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import s from './lk.module.scss'
 
 //Создание заявки
@@ -109,7 +110,7 @@ const CreateBid = () => {
     );
 };
 
-const Bid = ({bid}) =>{
+const Bid = ({bid, bidType}) =>{
     return(
         <div className={s.bid}>
             <div className={s.bid__header}>
@@ -129,9 +130,20 @@ const Bid = ({bid}) =>{
                     <h4>Адрес</h4>
                     <h4 className={s.bid__info__wrapper__data}>{bid.from}</h4>    
                 </div>
+
             </div>
-            {bid.status != "Выполнено" && (
-                <button className={s.bid__cancelBtn}>Отозвать заявку</button>
+            
+            {bid.status != "Завершена" && bidType == "veteran" && (
+                <div className={s.bid__btns}>
+                    <button className={s.bid__cancelBtn + ' ' + s.bid__btn}>Отозвать заявку</button>
+                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Завершить</button>
+                </div>
+            )}
+            
+            {bid.status == "Новая" && bidType == "volunteer" && (
+                <div className={s.bid__btns}>
+                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Откликнуться</button>
+                </div>
             )}
         </div>
     )
@@ -139,49 +151,102 @@ const Bid = ({bid}) =>{
 
 const LkVeteran = () =>{
 
+    //Флаг ветеран или волонтер
+    const location = useLocation();
+    const userType = location.state?.userType;
+    const userTypeRu = userType == "veteran" ? "ветерана" : "волонтера"
+
     const veteran = {
         firstName: "Сергей",
-        lastName: "Залупко",
-        login: "zalupko_serega",
+        lastName: "Петров",
+        login: "petrov_sergey",
         phone: "88005553535",
-        city: "Ржежопинск"
+        city: "Псков"
+    }
+
+    const volunteer = {
+        firstName: "Иван",
+        lastName: "Иванов",
+        login: "ivan_123",
+        phone: "88005553510",
+        city: "Псков"
+    }
+
+    let user = {}
+    if(userType == "veteran"){
+        user = veteran
+    }else if(userType == "volunteer"){
+        user = volunteer
     }
 
     const bids = [
         {
             type: 'Медицинская помощь',
-            description: 'Оторвало нахуй палец на ноге ребята помогите',
-            from: 'Тула, ул Ленина д 5 кв 1488',
-            status: 'Выполнено',
+            description: 'Не могу ходить, нужна помощь врачей',
+            from: 'Псков, ул Ленина д 5 кв 10',
+            status: 'Завершена',
             createdAt: '01-04-2025',
         },
         {
-            type: 'Медицинская помощь',
-            description: 'Оторвало нахуй ногу тут уже хз как поможете',
+            type: 'Помощь с транспортом',
+            description: 'Хочу навестить родственников из Москвы, но в связи с болезнью не могу поехать на поезде, требуется специальный автомобиль.',
+            from: 'Псков, ул Ленина д 5 кв 1488',
+            status: 'Выполняется',
+            createdAt: '10-04-2025',
+        },
+        {
+            type: 'Психологическая поддержка',
+            description: 'Скучно одному, приходите расскажу интересные истории',
+            from: 'Псков, ул Ленина д 5 кв 1488',
+            status: 'Новая',
+            createdAt: '01-04-2025',
+        },
+        {
+            type: 'Другое',
+            description: 'Нужна помощь с поиском друга-ветерана',
             from: 'Тула, ул Ленина д 5 кв 1488',
-            status: 'В процессе',
+            status: 'Новая',
             createdAt: '10-04-2025',
         }
     ]
+
+
     return(
         <section className={s.container}>
             <h1>
-                Личный кабинет
+                Личный кабинет {userTypeRu}
             </h1>
+
             <div className={s.info}>
                 <h4 className={s.fio}>
-                    {veteran.lastName + " " + veteran.firstName}
+                    {user.lastName + " " + user.firstName}
                 </h4>
-                <h5 className={s.phone}>{veteran.phone}</h5>
-                <h5 className={s.city}>{veteran.city}</h5>
+                <h5 className={s.phone}>{user.phone}</h5>
+                <h5 className={s.city}>{user.city}</h5>
             </div>
-            <CreateBid />
-            <h2>История заявок</h2>
-            <div className={s.bids}>
-                {bids.map((item, key) =>(
-                    <Bid bid={item} key={key}/>
-                ))}
-            </div>
+            {userType == "veteran" &&(
+            <>
+                <CreateBid />
+                <h2>История заявок</h2>
+                <div className={s.bids}>
+                    {bids.map((item, key) =>(
+                        <Bid bid={item} key={key} bidType={userType}/>
+                    ))}
+                </div>
+                </>
+            )}
+            {userType == "volunteer" && (
+                <>
+                    <h2>Доступные заявки</h2>
+                    <div className={s.bids}>
+                        {bids.map((item, key) =>{
+                            if(item.status == 'Новая'){
+                                return(<Bid bid={item} key={key} bidType={userType}/>)
+                            } 
+                        })}
+                    </div>
+                </>
+            )}
         </section>
     )
 }
