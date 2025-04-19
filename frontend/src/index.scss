@@ -7,7 +7,7 @@
 }
 
 body{
-    color: rgba(0, 0, 0, 0.801);
+    color: rgba(0, 0, 0, 0.8);
     font-family:Arial, Helvetica, sans-serif ;
     background-color: #e7e3e3de;
 }
@@ -30,4 +30,8 @@ a{
 
 * {
     font-size: calc(var(--index) * 0.75);
+
+    @media screen and (max-width: 600px) {
+        font-size: calc(var(--index) * 1.2);
+    }
 }

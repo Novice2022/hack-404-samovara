@@ -19,15 +19,24 @@
 @mixin flex-between {
     @include flex;
 
-    align-items: center;
     justify-content: space-between;
 }
+
+@mixin box-container {
+    background-color: $input-bg-color;
+    padding: calc(var(--index) * 1);
+    border-radius: calc(var(--index) * 0.4);
+    box-shadow: $shadow;
+    margin-bottom: calc(var(--index));
+}
+
 
 $primary-color: #4CAF50;
 $red-color: #FF4D4D;
 $text-color: #333333;
 $input-bg-color: #FFFFFF;
-$shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1);
+$shadow: 0 0 calc(var(--index) * .75) rgba(0, 0, 0, 0.1);
+
 
 .container {
     max-width: calc(var(--index) * 50);
@@ -35,27 +44,9 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
     padding: calc(var(--index) * 1.5);
     font-family: 'Roboto', sans-serif;
 
-    h1 {
-        font-size: calc(var(--index) * 1.4);
-        color: $text-color;
-        text-align: center;
-        margin-bottom: calc(var(--index) * 1.2);
-    }
-
-    h2 {
-        font-size: calc(var(--index) * 1.1);
-        color: $text-color;
-        margin: 0;
-    }
-
     .info {
         @include flex-between;
-        
-        background-color: $input-bg-color;
-        padding: calc(var(--index) * 1);
-        border-radius: calc(var(--index) * 0.4);
-        box-shadow: $shadow;
-        margin-bottom: calc(var(--index));
+        @include box-container;
 
         p {
             margin: 0;
@@ -64,31 +55,25 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
         }
     }
 
+    h2 {
+        font-size: calc(var(--index) * 1);
+        color: $text-color;
+        text-align: center;
+        margin: 0;
+    }
+
     .create {
         @include flex-column;
-        
-        background-color: $input-bg-color;
-        padding: calc(var(--index) * 1.2);
-        border-radius: calc(var(--index) * 0.4);
-        box-shadow: $shadow;
-        margin-bottom: calc(var(--index));
-
-        &__title {
-            font-size: calc(var(--index) * 1);
-            color: $text-color;
-            text-align: center;
-        }
+        @include box-container;
 
         .form {
             @include flex-column;
 
             &__wrapper {
                 label {
-                    display: block;
                     font-weight: bold;
                     color: $text-color;
-                    font-size: calc(var(--index) * 0.7);
-                    padding-left: calc(var(--index) * 0.25);;
+                    padding-left: calc(var(--index) * 0.25);
                     margin-bottom: calc(var(--index) * 0.2);
                 }
             }
@@ -136,87 +121,65 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
     }
 
     .bids {
+        @include flex-column;
+        @include box-container;
+
+        margin-bottom: 0;
+
         .bid {
+            @include box-container;
+            @include flex-column;
+
+            margin-bottom: 0;
             background-color: $input-bg-color;
-            padding: calc(var(--index) * 1);
-            border-radius: calc(var(--index) * 0.4);
-            box-shadow: $shadow;
-            margin-bottom: calc(var(--index) * 1);
+            gap: calc(var(--index) * 1.5);
+            padding: calc(var(--index) * .5);
 
-            &__header {
+            .bid_status {
                 @include flex-between;
-                
-                margin-bottom: calc(var(--index) * 0.6);
 
-                h3 {
-                    margin: 0;
-                    font-size: calc(var(--index) * 1);
+                span {
 
-                    &.status {
-                        color: $primary-color;
+                    font-weight: bold;
+                    color: $text-color;
+                }
+
+                .status {
+                    font-weight: normal;
+                    color: rgba(0, 0, 0, 0.8);
+                    text-decoration: underline
+                }
+            }
+
+            .bid_info {
+                @include flex-column;
+
+                .info_atom_title {
+                    font-weight: bold;
+                    color: $text-color;
+                }
+
+                @media screen and (max-width: 1920px) {
+                    .info_atom {
+                        @include flex-between;
+
+                        gap: calc(var(--index) * 5);
+                        text-align: justify;
                     }
+                }
 
-                    &.fate {
-                        color: #888;
+                @media screen and (max-width: 1000px) {
+                    .info_atom {
+                        @include flex-column;
+
+                        gap: 0;
+                        text-align: left;
                     }
                 }
             }
 
-            &__info {
-                &__wrapper {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: calc(var(--index) * 0.4);
-
-                    h4 {
-                        margin: 0;
-                        color: $text-color;
-                        font-size: calc(var(--index) * 0.8);
-                    }
-                
-                    &__data {
-                        color: #666;
-                        width: 80%
-                    }
-                }
-            }
-
-            &__btns {
+            .form_controllers {
                 @include flex-between;
-
-                margin-top: calc(var(--index) * 1.5);
-
-                .bid__btn {
-                    @include flex-center;
-                    padding: calc(var(--index) * 0.3) calc(var(--index) * 0.8);
-                    border: none;
-                    border-radius: calc(var(--index) * 0.3);
-                    font-size: calc(var(--index) * .8);
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                }
-                
-                .bid__cancelBtn {
-                    background-color: $red-color;
-                    color: white;
-
-                    &:hover {
-                        background-color: darken($red-color, 10%);
-                    }
-                }
-
-                .bid__endBtn {
-                    background-color: $primary-color;
-                    color: white;
-
-                    &:hover {
-                        background-color: darken($primary-color, 10%);
-                    }
-                }
-                
-                .bid__endBtn {
-                    margin-left: auto;
-                }
             }
         }
     }

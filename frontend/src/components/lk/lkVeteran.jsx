@@ -135,40 +135,42 @@ const CreateBid = () => {
     );
   };
 
-const Bid = ({bid, bidType}) =>{
-    return(
+const Bid = ({bid, bidType}) => {
+    return (
         <div className={s.bid}>
-            <div className={s.bid__header}>
-                <h3 className={s.bid__status}>{bid.status}</h3>
-                <h3 className={s.bid__fate}>{bid.createdAt}</h3>
+            <div className={s.bid_status}>
+                <span>Статус: <span className={s.status}>{bid.status}</span></span>
+                <span>{bid.createdAt}</span>
             </div>
-            <div className={s.bid__info}>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Тип помощи</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.type}</h4>    
+            <div className={s.bid_info}>
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Тип помощи</span>
+                    <span>{bid.type}</span>
                 </div>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Описание</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.description}</h4>    
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Описание</span>
+                    <span>{bid.description}</span>
                 </div>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Адрес</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.from}</h4>    
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Адрес</span>
+                    <span>{bid.from}</span>
                 </div>
             </div>
-            {bid.status != "Завершена" && bidType == "veteran" && (
-                <div className={s.bid__btns}>
-                    <button className={s.bid__cancelBtn + ' ' + s.bid__btn}>Отозвать заявку</button>
-                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Завершить</button>
-                </div>
-            )}
-            {bid.status == "Новая" && bidType == "volunteer" && (
-                <div className={s.bid__btns}>
-                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Откликнуться</button>
-                </div>
-            )}
+            {
+                bidType === 'veteran' && bid.status !== 'Завершена' && (
+                    <div className={s.form_controllers}>
+                        <Button label="Отозвать заявку" severity="danger" raised />
+                        <Button label="Завершить" severity="success" raised />
+                    </div>
+                )
+            }
+            {
+                bidType == "volunteer" && bid.status == "Новая" && (
+                    <Button label="Откликнуться" severity="success" raised />
+                )
+            }
         </div>
-    )
+    );
 }
 
 const LkVeteran = () => {
@@ -248,12 +250,12 @@ const LkVeteran = () => {
     //     city: "Псков"
     // }
 
-    // let user = {}
+    // let user = {};
 
     // if (userType === "veteran"){
-    //     user = veteran
+    //     user = veteran;
     // } else if (userType === "volunteer"){
-    //     user = volunteer
+    //     user = volunteer;
     // }
 
     // const bids = [
@@ -287,7 +289,7 @@ const LkVeteran = () => {
     //     }
     // ]
 
-    return(
+    return (
         <section className={s.container}>
             <div className={s.info}>
                 <p>{userData.lastName + " " + userData.firstName}</p>
@@ -317,7 +319,7 @@ const LkVeteran = () => {
                 </>
             )}
         </section>
-    )
+    );
 }
 
-export default LkVeteran
+export default LkVeteran;
