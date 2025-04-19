@@ -25,6 +25,7 @@ namespace Hakaton.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUserDto)
         {
+            //check account's login is already exists
             if (await _dbContext.Users.AnyAsync(u => u.Login == registerUserDto.Login))
             {
                 return BadRequest("Registration failed. The username is incorrect.");
