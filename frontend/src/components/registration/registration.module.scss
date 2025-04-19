@@ -51,7 +51,7 @@ main{
 /*Код для форм*/
 .container{
     width: 100vw;
-    height: 90vh;
+    height: 100vh;
     @include f-center();
     flex-direction: column;
     justify-content: center;
