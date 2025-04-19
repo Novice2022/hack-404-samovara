@@ -264,7 +264,7 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
 
                 h3 {
                     margin: 0;
-                    font-size: calc(var(--index) * 0.7);
+                    font-size: calc(var(--index) * 1);
 
                     &.status {
                         color: $primary-color;
@@ -285,25 +285,25 @@ $shadow: 0px calc(var(--index) * 0.2) calc(var(--index) * 0.4) rgba(0, 0, 0, 0.1
                     h4 {
                         margin: 0;
                         color: $text-color;
-                        font-size: calc(var(--index) * 0.6);
-
-                        &.data {
-                            color: #666;
-                        }
+                        font-size: calc(var(--index) * 0.8);
+                    }
+                    &__data {
+                        color: #666;
+                        width: 80%
                     }
                 }
             }
 
             &__btns {
                 @include flex-between;
-                margin-top: calc(var(--index) * 0.6);
+                margin-top: calc(var(--index) * 1.5);
 
                 .bid__btn {
                     @include flex-center;
                     padding: calc(var(--index) * 0.3) calc(var(--index) * 0.8);
                     border: none;
                     border-radius: calc(var(--index) * 0.3);
-                    font-size: calc(var(--index) * 0.5);
+                    font-size: calc(var(--index) * .8);
                     cursor: pointer;
                     transition: background-color 0.3s ease;
                 }
