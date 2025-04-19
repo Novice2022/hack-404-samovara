@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -41,7 +42,7 @@ const CreateBid = () => {
 
     return (
         <div className={s.create}>
-            <h2 className={s.create__title}>Создание новой заявки</h2>
+            <h2>Создание новой заявки</h2>
             <form onSubmit={handleSubmit} className={s.form}>
                 <div className={s.form__wrapper}>
                     <label htmlFor="description" className={s.form__label}>
@@ -100,67 +101,69 @@ const CreateBid = () => {
     );
 };
 
-const Bid = ({bid, bidType}) =>{
-    return(
+const Bid = ({bid, bidType}) => {
+    return (
         <div className={s.bid}>
-            <div className={s.bid__header}>
-                <h3 className={s.bid__status}>{bid.status}</h3>
-                <h3 className={s.bid__fate}>{bid.createdAt}</h3>
+            <div className={s.bid_status}>
+                <span>Статус: <span className={s.status}>{bid.status}</span></span>
+                <span>{bid.createdAt}</span>
             </div>
-            <div className={s.bid__info}>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Тип помощи</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.type}</h4>    
+            <div className={s.bid_info}>
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Тип помощи</span>
+                    <span>{bid.type}</span>
                 </div>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Описание</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.description}</h4>    
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Описание</span>
+                    <span>{bid.description}</span>
                 </div>
-                <div className={s.bid__info__wrapper}>
-                    <h4>Адрес</h4>
-                    <h4 className={s.bid__info__wrapper__data}>{bid.from}</h4>    
+                <div className={s.info_atom}>
+                    <span className={s.info_atom_title}>Адрес</span>
+                    <span>{bid.from}</span>
                 </div>
             </div>
-            {bid.status != "Завершена" && bidType == "veteran" && (
-                <div className={s.bid__btns}>
-                    <button className={s.bid__cancelBtn + ' ' + s.bid__btn}>Отозвать заявку</button>
-                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Завершить</button>
-                </div>
-            )}
-            {bid.status == "Новая" && bidType == "volunteer" && (
-                <div className={s.bid__btns}>
-                    <button className={s.bid__endBtn + ' ' + s.bid__btn}>Откликнуться</button>
-                </div>
-            )}
+            {
+                bidType === 'veteran' && bid.status !== 'Завершена' && (
+                    <div className={s.form_controllers}>
+                        <Button label="Отозвать заявку" severity="danger" raised />
+                        <Button label="Завершить" severity="success" raised />
+                    </div>
+                )
+            }
+            {
+                bidType == "volunteer" && bid.status == "Новая" && (
+                    <Button label="Откликнуться" severity="success" raised />
+                )
+            }
         </div>
-    )
+    );
 }
 
 const LkVeteran = () => {
     const location = useLocation();
     const userType = location.state?.userType;
-    const userTypeRu = userType === "veteran" ? "Ветеран" : "Волонтер"
+    const userTypeRu = userType === "veteran" ? "Ветеран" : "Волонтер";
 
     const veteran = {
         firstName: "Сергей",
         lastName: "Петров",
         login: "petrov_sergey",
         city: "Псков"
-    }
+    };
 
     const volunteer = {
         firstName: "Иван",
         lastName: "Иванов",
         login: "ivan_123",
         city: "Псков"
-    }
+    };
 
-    let user = {}
+    let user = {};
 
     if (userType === "veteran"){
-        user = veteran
+        user = veteran;
     } else if (userType === "volunteer"){
-        user = volunteer
+        user = volunteer;
     }
 
     const bids = [
@@ -192,39 +195,47 @@ const LkVeteran = () => {
             status: 'Новая',
             createdAt: '10-04-2025',
         }
-    ]
+    ];
 
-    return(
+    return (
         <section className={s.container}>
             <div className={s.info}>
                 <p>{user.lastName + " " + user.firstName}</p>
                 <p>{userTypeRu} из города {user.city}</p>
             </div>
-            {userType == "veteran" &&(
-            <>
-                <CreateBid />
-                <h2>История заявок</h2>
-                <div className={s.bids}>
-                    {bids.map((item, key) => (
-                        <Bid bid={item} key={key} bidType={userType}/>
-                    ))}
-                </div>
-                </>
-            )}
+            {
+                userType == "veteran" && (
+                    <>
+                        <CreateBid />
+                        <div className={s.bids}>
+                            <h2>История заявок</h2>
+                            {
+                                bids.map((item, key) => (
+                                    <Bid bid={item} key={key} bidType={userType}/>
+                                ))
+                            }
+                        </div>
+                    </>
+                )
+            }
             {userType == "volunteer" && (
                 <>
                     <h2>Доступные заявки</h2>
                     <div className={s.bids}>
-                        {bids.map((item, key) =>{
-                            if (item.status == 'Новая') {
-                                return (<Bid bid={item} key={key} bidType={userType}/>)
-                            } 
-                        })}
+                        {
+                            bids.map((item, key) =>{
+                                if (item.status == 'Новая') {
+                                    return (
+                                        <Bid bid={item} key={key} bidType={userType}/>
+                                    );
+                                } 
+                            })
+                        }
                     </div>
                 </>
             )}
         </section>
-    )
+    );
 }
 
-export default LkVeteran
+export default LkVeteran;
