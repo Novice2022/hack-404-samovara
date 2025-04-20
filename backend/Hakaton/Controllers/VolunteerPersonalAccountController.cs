@@ -17,7 +17,7 @@ public class VolunteerPersonalAccountController : ControllerBase
 {
     private readonly HakatonDbContext _dbContext;
     private readonly ILogger<VolunteerPersonalAccountController> _logger;
-    private readonly IHostEnvironment _hostEnvironment; //for development status
+    private readonly IHostEnvironment _hostEnvironment;
     
     public VolunteerPersonalAccountController(IJwtService jwtService, HakatonDbContext dbContext, ILogger<VolunteerPersonalAccountController> logger, IHostEnvironment hostEnvironment)
     {
