@@ -222,7 +222,7 @@ const Bid = ({ bid, bidType, user, itResponse }) => {
 
             )}
             {
-                bidType === 'veteran' && bid.status !== 'Завершена' && (
+                bidType === 'veteran' && !(['Завершена', 'Отменена'].includes(bid.status)) && (
                     <div className={s.form_controllers}>
                         <Button label="Отозвать заявку" severity="danger" raised onClick={handleCancelRequest} />
                         <Button label="Завершить" severity="success" raised />
@@ -280,7 +280,6 @@ const LkVeteran = () => {
         const fetchRequestsVolunteer = async () => {
             try {
                 const data2 = await getVolunteerRequests(); // Вызываем метод для получения заявок
-
 
                 const formattedBids = data2.map(request => ({
                     id: request.guid,
