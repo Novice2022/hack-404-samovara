@@ -1,50 +1,61 @@
 import { useState, useEffect } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import s from './registration.module.scss'
-import { loginValidationRules, registerValidationRules, validateForm } from './validation';
+import { loginValidationRules, registerValidationRules, validateForm, validateField } from './validation';
 import { registerUser, loginUser } from '../../api/api';
 import axios from 'axios';
 import { SHA256 } from 'crypto-js';
 
 const Registration = () => {
-    //получения флага с стартовой страницы
-    const location = useLocation();
-    const navigate = useNavigate();
-    const userType = location.state?.userType;
-    const userTypeNum = userType === "veteran" ? 1 : 2;
-  
-    const [active, setActive] = useState(false);
-    const handleActive = () => {
-        setActive(!active)
+  //получения флага с стартовой страницы
+  const location = useLocation();
+  const navigate = useNavigate();
+  const userType = location.state?.userType;
+  const userTypeNum = userType === "veteran" ? 1 : 2;
+
+  const [active, setActive] = useState(false);
+  const handleActive = () => {
+    setActive(!active)
+  }
+  const [fields, setFields] = useState({
+    login: { value: "", isFocused: false },
+    pass: { value: "", isFocused: false },
+    firstName: { value: "", isFocused: false },
+    lastName: { value: "", isFocused: false },
+    pass2: { value: "", isFocused: false },
+    phone: { value: "", isFocused: false },
+    city: { value: "", isFocused: false },
+  });
+
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
+  const [message, setMessage] = useState({ text: '', type: '' });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFields(prev => ({
+      ...prev,
+      [name]: { ...prev[name], value },
+    }));
+  };
+
+  const handleFocus = (name) => {
+    setFields(prev => ({
+      ...prev,
+      [name]: { ...prev[name], isFocused: true },
+    }));
+  };
+
+  const handleBlur = (name) => {
+    // Валидация при потере фокуса
+    const rules = active ? registerValidationRules : loginValidationRules;
+    if (rules[name]) {
+      const error = validateField(name, fields[name].value, rules[name], fields);
+      setErrors(prev => ({ ...prev, [name]: error }));
     }
-    const [fields, setFields] = useState({
-      login: { value: "", isFocused: false },
-      pass: { value: "", isFocused: false },
-      firstName: { value: "", isFocused: false },
-      lastName: { value: "", isFocused: false },
-      pass2: { value: "", isFocused: false },
-      phone: { value: "", isFocused: false },
-      city: { value: "", isFocused: false },
-    });
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [serverError, setServerError] = useState(null);
-    const [message, setMessage] = useState({ text: '', type: '' });
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFields(prev => ({
-            ...prev,
-            [name]: { ...prev[name], value },
-        }));
-    };
-
-    const handleFocus = (name) => {
-        setFields(prev => ({
-            ...prev,
-            [name]: { ...prev[name], isFocused: true },
-        }));
-    };
 
     //Хэшируем пароль
     const hashedPassword = SHA256(fields.pass.value).toString();;
@@ -63,9 +74,12 @@ const Registration = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        const { isValid, errors: validationErrors } = validateForm(fields, active);
+        setErrors(validationErrors);
         setMessage('');
       
         try {
+
           await registerUser(userData);
           // Сохраняем данные пользователя в localStorage
           const userKey = `user-${fields.login.value}`; // Уникальный ключ для каждого пользователя
@@ -77,6 +91,7 @@ const Registration = () => {
             pass: { value: '', isFocused: false },
             pass2: { value: '', isFocused: false }
           }));
+
         } catch (error) {
           setMessage({ text: error.message, type: 'error' });
         } finally {
@@ -126,6 +141,7 @@ const Registration = () => {
                 value={fields[name]?.value || ''}
                 onChange={handleChange}
                 onFocus={() => handleFocus(name)}
+                onBlur={() => handleBlur(name)}
             />
             <label
                 className={`${s.form__label} ${fields[name]?.isFocused || fields[name]?.value ? s.form__label_focused : ''}`}
@@ -136,6 +152,8 @@ const Registration = () => {
             {errors[name] && <div className={s.form__error}>{errors[name]}</div>}
         </div>
     );
+
+
 
 
     // Определяем город при монтировании компонента
@@ -168,21 +186,6 @@ const Registration = () => {
       fetchUserLocation();
     }, []);
 
-    // ▄███████▀▀▀▀▀▀███████▄
-    // ░▐████▀▒ЗАПУСКАЕМ▒▀██████▄
-    // ░███▀▒▒▒▒▒ДЯДЮ▒▒▒▒▒▒▀█████
-    // ░▐██▒▒▒▒▒▒БОГДАНА▒▒▒▒▒████▌
-    // ░▐█▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒████▌
-    // ░░█▒▄▀▀▀▀▀▄▒▒▄▀▀▀▀▀▄▒▐███▌
-    // ░░░▐░░░▄▄░░▌▐░░░▄▄░░▌▐███▌
-    // ░▄▀▌░░░▀▀░░▌▐░░░▀▀░░▌▒▀▒█▌
-    // ░▌▒▀▄░░░░▄▀▒▒▀▄░░░▄▀▒▒▄▀▒▌
-    // ░▀▄▐▒▀▀▀▀▒▒▒▒▒▒▀▀▀▒▒▒▒▒▒█
-    // ░░░▀▌▒▄██▄▄▄▄████▄▒▒▒▒█▀
-    // ░░░░▄██████████████▒▒▐▌
-    // ░░░▀███▀▀████▀█████▀▒▌
-    // ░░░░░▌▒▒▒▄▒▒▒▄▒▒▒▒▒▒▐
-    // ░░░░░▌▒▒▒▒▀▀▀▒▒▒▒▒▒▒▐
 
 
     return (

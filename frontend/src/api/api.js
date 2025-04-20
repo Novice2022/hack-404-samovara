@@ -228,3 +228,38 @@ export const getVolunteerResponses = async () => {
     throw new Error(error.response?.data?.message || 'Ошибка при получении откликов');
   }
 };
+
+// Завершение заявки
+export const finishRequest = async (requestGuid) => {
+  try {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      throw new Error('Токен авторизации отсутствует.');
+    }
+
+    // Логируем данные для отладки
+    console.log('Отправляем запрос на завершение заявки:', { requestGuid });
+
+    const response = await axios.post(
+      `${API_URL}/VeteranPersonalAccount/requests/selectvolunteer/finish`,
+      {
+        requestId: requestGuid // Передаем GUID заявки
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      }
+    );
+
+    return response.data; // Возвращаем данные из ответа
+  } catch (error) {
+    console.error('Ошибка при завершении заявки:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config
+    });
+    throw new Error(error.response?.data?.message || 'Ошибка при завершении заявки');
+  }
+};

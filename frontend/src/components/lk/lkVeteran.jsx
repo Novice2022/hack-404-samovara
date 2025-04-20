@@ -8,7 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Button } from 'primereact/button';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createVeteranRequest, getVeteranRequests, getVolunteerRequests, respondToRequest, selectVolunteer, cancelRequest, getVolunteerResponses } from '../../api/api';
+import { createVeteranRequest, getVeteranRequests, getVolunteerRequests, respondToRequest, selectVolunteer, cancelRequest, getVolunteerResponses, finishRequest } from '../../api/api';
 import s from './lk.module.scss'
 
 const CreateBid = () => {
@@ -183,11 +183,36 @@ const Bid = ({ bid, bidType, user, itResponse }) => {
         }
     };
 
+    // Функция для завершения заявки
+    const handleFinishRequest = async () => {
+        try {
+            await finishRequest(bid.id);
+            alert('Заявка успешно завершена!');
+        } catch (error) {
+            console.error('Ошибка при завершении заявки:', error);
+            alert('Не удалось завершить заявку. Попробуйте позже.');
+        }
+    };
+
+    //форматирование даты
+    const formatDate = (isoDate) => {
+        const date = new Date(isoDate);
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false // Используем 24-часовой формат
+        };
+        return date.toLocaleString('ru-RU', options).replace(',', ''); // Убираем запятую
+    };
     return (
         <div className={s.bid}>
             <div className={s.bid_status}>
                 <span>Статус: <span className={s.status}>{bid.status}</span></span>
-                <span>{bid.createdAt}</span>
+                <span>{formatDate(bid.createdAt)}</span>
             </div>
             <div className={s.bid_info}>
                 <div className={s.info_atom}>
@@ -205,35 +230,31 @@ const Bid = ({ bid, bidType, user, itResponse }) => {
             </div>
 
             {/* игорь вот эту темку поправишь */}
-            {bidType == 'veteran' && !bid.volunteerSelect ? (
+            {bidType == 'veteran' && !bid.volunteerSelect && (
                 bid.responses.map((item, key) => (
                     <>
                         <div key={key}>{item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
                         <Button label="Выбрать исполнителя" onClick={() => handleSelectVolunteer(item.id)} />
                     </>
-                ))) : (
-
-                // bid.responses.map((item, key) =>(
-                //     <>
-                //         <div key={key}> Выбран исполнитель {item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
-                //     </> 
-                <div>ffgd</div>
-                // ))
-
-            )}
+                
+            )))}
             {
                 bidType === 'veteran' && !(['Завершена', 'Отменена'].includes(bid.status)) && (
                     <div className={s.form_controllers}>
                         <Button label="Отозвать заявку" severity="danger" raised onClick={handleCancelRequest} />
-                        <Button label="Завершить" severity="success" raised />
+                        <Button label="Завершить" severity="success" raised onClick={handleFinishRequest} />
                     </div>
                 )
             }
             {
                 bidType == "volunteer" && bid.status == "Новая" && !itResponse && (
-                    <Button label="Откликнуться" severity="success" onClick={handleRespond} />
-                )
+                    <>
+                        <Button label="Откликнуться" severity="success" onClick={handleRespond} />
+                        <div>{bid.veteran.firstName} {bid.veteran.lastName} {bid.veteran.phoneNumber}</div>
+                    </>
+                )   
             }
+
         </div>
     );
 }
@@ -246,6 +267,12 @@ const LkVeteran = () => {
 
     const [bidsVeteran, setBidsVeteran] = useState([]);
     const [bidsVolunteer, setBidsVolunteer] = useState([]);
+
+
+    //получение активных заявок у волонтера
+    const [responses, setResponses] = useState([]); // Состояние для хранения откликов
+    const [loading, setLoading] = useState(true); // Состояние загрузки
+    const [error, setError] = useState(null); // Состояние ошибки
 
     useEffect(() => {
         const fetchRequestsVeteran = async () => {
@@ -302,18 +329,6 @@ const LkVeteran = () => {
                 console.error('Не удалось загрузить заявки:', error);
             }
         };
-
-        userType === "veteran" ? fetchRequestsVeteran() : fetchRequestsVolunteer()
-
-    }, []);
-
-    //получение активных заявок у волонтера
-    const [responses, setResponses] = useState([]); // Состояние для хранения откликов
-    const [loading, setLoading] = useState(true); // Состояние загрузки
-    const [error, setError] = useState(null); // Состояние ошибки
-
-    // Получение откликов при монтировании компонента
-    useEffect(() => {
         const fetchResponses = async () => {
             try {
                 setLoading(true);
@@ -341,11 +356,15 @@ const LkVeteran = () => {
                 setError('Не удалось загрузить отклики. Попробуйте позже.');
                 setLoading(false);
             }
-  
+
         };
-        fetchResponses();
+
+        userType === "veteran" ? fetchRequestsVeteran() : fetchRequestsVolunteer(), fetchResponses()
+
     }, []);
 
+
+   
 
 
     return (
@@ -369,7 +388,9 @@ const LkVeteran = () => {
                 <>
                     <div className={s.bids}>
                         <h2>Доступные заявки</h2>
-                        {bidsVolunteer.map((item, key) => {
+                        {bidsVolunteer.filter(
+                            bid => !responses.some(response => response.id === bid.id)
+                        ).map((item, key) => {
                             if (item.status == 'Новая') {
                                 return (<Bid bid={item} key={key} bidType={userType} user={userData} />)
                             }
@@ -383,7 +404,7 @@ const LkVeteran = () => {
                     <div className={s.bids}>
                         {responses.map((item, key) => {
                             if (item.status == 'Новая') {
-                                return (<Bid bid={item} key={key} bidType={userType} user={userData} itResponse={true}/>)
+                                return (<Bid bid={item} key={key} bidType={userType} user={userData} itResponse={true} />)
                             }
                         })}
                     </div>
