@@ -62,12 +62,10 @@ public class VeteranPersonalAccountController: Controller
     {
         try
         {
-            // Получаем все заявки ветерана
             var requests = _dbContext.Requests
                 .Where(request => request.VeteranId == Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value))
                 .ToList();
 
-// Получаем все ответы + пользователей, чьи заявки входят в этот список
             var responsesWithUsers = _dbContext.Responses
                 .Where(r => requests.Select(req => req.Guid).Contains(r.RequestId))
                 .Join(_dbContext.Users,
@@ -75,12 +73,11 @@ public class VeteranPersonalAccountController: Controller
                     user => user.Id,
                     (response, user) => new { response, user })
                 .ToList();
-
-// Группируем по ID заявки
+            
             var responsesLookup = responsesWithUsers
                 .ToLookup(x => x.response.RequestId);
 
-// Формируем DTO-шки
+
             var requestDtosList = requests.Select(req => new RequestForVetransDtos
             {
                 Guid = req.Guid,
@@ -215,7 +212,27 @@ public class VeteranPersonalAccountController: Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while create response by the volunteer.");
+            _logger.LogError(ex, "An error occurred while accept response by the veteran.");
+            return BadRequest(500);
+        }
+    }
+
+    [HttpPost("requests/selectvolunteer/finish")]
+    public async Task<IActionResult> FinishRequest([FromBody] Guid requestId)
+    {
+        try
+        {
+            var request = await _dbContext.Requests.FindAsync(requestId);
+            request.Status = RequestStatus.Completed;
+            
+            _dbContext.Requests.Update(request);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { Id = request.Guid});
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while finish response by the veteran.");
             return BadRequest(500);
         }
     }

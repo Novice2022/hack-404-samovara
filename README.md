@@ -63,12 +63,18 @@ sudo apt install -y dotnet-sdk-8.0
 
 cd ./backend/Hackaton/
 
-dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.0
 nano Hakaton.csproj  # Заменяем в строке <TargetFramework>net9.0</TargetFramework> версию на 8.0
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.0
 ```
 
 Копируем файл `appsettings.json` в папку Hackaton.
 
 ``` shell
+docker run -d -p 5432:5432 --name my_postgres \
+  -e POSTGRES_USER=user \
+  -e POSTGRES_PASSWORD=12345 \
+  -e POSTGRES_DB=hakaton \
+  postgres
+
 dotnet run --urls="http://0.0.0.0:5000"
 ```
