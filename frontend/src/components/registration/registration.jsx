@@ -66,19 +66,15 @@ const Registration = () => {
         setMessage('');
       
         try {
-
-          console.log(fields.login.value, hashedPassword)
           await registerUser(userData);
+
           setMessage({ text: 'Регистрация успешна! Войдите в систему', type: 'success' });
-          setActive(false); // Переключаем на форму входа
-          
-          // Очищаем только пароли (логин остается)
+          setActive(false);
           setFields(prev => ({
             ...prev,
             pass: { value: '', isFocused: false },
             pass2: { value: '', isFocused: false }
           }));
-      
         } catch (error) {
           setMessage({ text: error.message, type: 'error' });
         } finally {
@@ -92,13 +88,10 @@ const Registration = () => {
         setMessage('');
       
         try {
-            console.log(fields.login.value, hashedPassword)
           const { token, user } = await loginUser({
             login: fields.login.value,
             passwordHash: hashedPassword
           });
-
-          
       
           localStorage.setItem('authToken', token);
           localStorage.setItem('userData', JSON.stringify(user));
@@ -109,7 +102,6 @@ const Registration = () => {
               userInfo: userData
             }
           });
-
         } catch (error) {
           setMessage({ text: error.message, type: 'error' });
         } finally {

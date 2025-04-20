@@ -367,8 +367,8 @@ const LkVeteran = () => {
             {userType == "veteran" && (
                 <>
                     <CreateBid />
-                    <h2>История заявок</h2>
                     <div className={s.bids}>
+                        <h2>История заявок</h2>
                         {bidsVeteran.map((item, key) => (
                             <Bid bid={item} key={key} bidType={userType} user={userData} />
                         ))}
@@ -377,8 +377,8 @@ const LkVeteran = () => {
             )}
             {userType == "volunteer" && (
                 <>
-                    <h2>Доступные заявки</h2>
                     <div className={s.bids}>
+                        <h2>Доступные заявки</h2>
                         {bidsVolunteer.map((item, key) => {
                             if (item.status == 'Новая') {
                                 return (<Bid bid={item} key={key} bidType={userType} user={userData} />)
