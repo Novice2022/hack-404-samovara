@@ -1,0 +1,12 @@
+## Ignore .NET Core and .NET SDK files
+Hakaton/bin/
+Hakaton/obj/
+
+## Ignore environment-specific files
+Hakaton/appsettings.json
+
+.vs/
+
+## Ignore logs
+Hakaton/logs/
+*.log
