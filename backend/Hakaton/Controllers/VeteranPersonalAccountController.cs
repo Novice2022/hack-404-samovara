@@ -218,11 +218,11 @@ public class VeteranPersonalAccountController: Controller
     }
 
     [HttpPost("requests/selectvolunteer/finish")]
-    public async Task<IActionResult> FinishRequest([FromBody] Guid requestId)
+    public async Task<IActionResult> FinishRequest([FromBody] RequestFinishDTO requestId)
     {
         try
         {
-            var request = await _dbContext.Requests.FindAsync(requestId);
+            var request = await _dbContext.Requests.FindAsync(requestId.requestId);
             request.Status = RequestStatus.Completed;
             
             _dbContext.Requests.Update(request);
