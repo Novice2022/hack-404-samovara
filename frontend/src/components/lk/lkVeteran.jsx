@@ -227,17 +227,38 @@ const Bid = ({ bid, bidType, user, itResponse }) => {
                     <span className={s.info_atom_title}>Адрес</span>
                     <span>{bid.from}</span>
                 </div>
+                {
+                bidType == "volunteer"  && (
+                    <div className={s.bid_info}>
+                        <div className={s.info_atom}>
+                            <span className={s.info_atom_title}>Ветеран</span>
+                            <span>{bid.veteran.firstName} {bid.veteran.lastName}</span>
+                        </div>
+                        <div className={s.info_atom}>
+                            <span className={s.info_atom_title}>Контактный номер</span>
+                            <span>{bid.veteran.phoneNumber}</span>
+                        </div>
+                    </div>
+                )   
+                }
+                {bidType == 'veteran' && !bid.volunteerSelect && (
+                    bid.responses.map((item, key) => (
+                        <div className={s.bid_info + " " + s.bid_info_responseVolonter}>
+                            <div className={s.info_atom}>
+                                <span className={s.info_atom_title}>Волонтер</span>
+                                <span>{item.firstName} {item.lastName}</span>
+                            </div>
+                            <div className={s.info_atom}>
+                                <span className={s.info_atom_title}>Контактный номер</span>
+                                <span>{item.contactInfo}</span>
+                            </div>
+                            <Button label="Выбрать исполнителя" onClick={() => handleSelectVolunteer(item.id)} />
+                        </div>
+                )))}
             </div>
 
             {/* игорь вот эту темку поправишь */}
-            {bidType == 'veteran' && !bid.volunteerSelect && (
-                bid.responses.map((item, key) => (
-                    <>
-                        <div key={key}>{item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
-                        <Button label="Выбрать исполнителя" onClick={() => handleSelectVolunteer(item.id)} />
-                    </>
-                
-            )))}
+            
             {
                 bidType === 'veteran' && !(['Завершена', 'Отменена'].includes(bid.status)) && (
                     <div className={s.form_controllers}>
@@ -248,13 +269,10 @@ const Bid = ({ bid, bidType, user, itResponse }) => {
             }
             {
                 bidType == "volunteer" && bid.status == "Новая" && !itResponse && (
-                    <>
-                        <Button label="Откликнуться" severity="success" onClick={handleRespond} />
-                        <div>{bid.veteran.firstName} {bid.veteran.lastName} {bid.veteran.phoneNumber}</div>
-                    </>
-                )   
+                (
+                    <Button label="Откликнуться" severity="success" onClick={handleRespond} />
+                ))
             }
-
         </div>
     );
 }
