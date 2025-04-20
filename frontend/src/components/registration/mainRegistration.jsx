@@ -10,7 +10,8 @@ const MainRegistration = () =>{
         <main>
             <div className={s.main__wrapper}>
             <h1>
-                Добро пожаловать в сервис помощи ветеранам
+                Добро пожаловать в сервис <br/>
+                Поддержка рядом
             </h1>
 
             <div className={s.links}>
