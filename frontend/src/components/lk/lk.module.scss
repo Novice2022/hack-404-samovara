@@ -152,6 +152,10 @@ $shadow: 0 0 calc(var(--index) * .75) rgba(0, 0, 0, 0.1);
             }
 
             .bid_info {
+                &_responseVolonter{
+                    @include box-container();
+                }
+
                 @include flex-column;
 
                 .info_atom_title {
