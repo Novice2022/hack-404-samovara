@@ -1,0 +1,190 @@
+@mixin flex {
+    display: flex;
+    gap: calc(var(--index) * 1);
+}
+
+@mixin flex-column {
+    @include flex;
+
+    flex-direction: column;
+}
+
+@mixin flex-center {
+    @include flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    @include flex;
+
+    justify-content: space-between;
+}
+
+@mixin box-container {
+    background-color: $input-bg-color;
+    padding: calc(var(--index) * 1);
+    border-radius: calc(var(--index) * 0.4);
+    box-shadow: $shadow;
+    margin-bottom: calc(var(--index));
+}
+
+
+$primary-color: #4CAF50;
+$red-color: #FF4D4D;
+$text-color: #333333;
+$input-bg-color: #FFFFFF;
+$shadow: 0 0 calc(var(--index) * .75) rgba(0, 0, 0, 0.1);
+
+
+.container {
+    max-width: calc(var(--index) * 50);
+    margin: 0 auto;
+    padding: calc(var(--index) * 1.5);
+    font-family: 'Roboto', sans-serif;
+
+    .info {
+        @include flex-between;
+        @include box-container;
+
+        p {
+            margin: 0;
+            color: $text-color;
+            font-size: calc(var(--index) * 0.8);
+        }
+    }
+
+    h2 {
+        font-size: calc(var(--index) * 1);
+        color: $text-color;
+        text-align: center;
+        margin: 0;
+    }
+
+    .create {
+        @include flex-column;
+        @include box-container;
+
+        .form {
+            @include flex-column;
+
+            &__wrapper {
+                label {
+                    font-weight: bold;
+                    color: $text-color;
+                    padding-left: calc(var(--index) * 0.25);
+                    margin-bottom: calc(var(--index) * 0.2);
+                }
+            }
+
+            @media screen and (max-width: 1920px) {
+                &__wrapper {
+                    input, textarea, select {
+                        width: 100%;
+                        border: 1px solid #ddd;
+                        transition: border-color 0.3s ease;
+                    }
+                }
+
+                &__linewrapper {
+                    @include flex-between;
+
+                    align-items: end;
+                }
+            }
+
+            @media screen and (max-width: 1000px) {
+                &__wrapper {
+                    label {
+                        display: block;
+                        font-weight: bold;
+                        color: $text-color;
+                    }
+    
+                    input, textarea, select {
+                        width: 100%;
+                        border: 1px solid #ddd;
+                        transition: border-color 0.3s ease;
+                    }
+                }
+
+                &__linewrapper {
+                    @include flex-column;
+                    
+                    > div {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+
+    .bids {
+        @include flex-column;
+        @include box-container;
+
+        margin-bottom: 0;
+
+        .bid {
+            @include box-container;
+            @include flex-column;
+
+            margin-bottom: 0;
+            background-color: $input-bg-color;
+            gap: calc(var(--index) * 1.5);
+            padding: calc(var(--index) * .5);
+
+            .bid_status {
+                @include flex-between;
+
+                span {
+
+                    font-weight: bold;
+                    color: $text-color;
+                }
+
+                .status {
+                    font-weight: normal;
+                    color: rgba(0, 0, 0, 0.8);
+                    text-decoration: underline
+                }
+            }
+
+            .bid_info {
+                &_responseVolonter{
+                    @include box-container();
+                }
+
+                @include flex-column;
+
+                .info_atom_title {
+                    font-weight: bold;
+                    color: $text-color;
+                }
+
+                @media screen and (max-width: 1920px) {
+                    .info_atom {
+                        @include flex-between;
+
+                        gap: calc(var(--index) * 5);
+                        text-align: justify;
+                    }
+                }
+
+                @media screen and (max-width: 1000px) {
+                    .info_atom {
+                        @include flex-column;
+
+                        gap: 0;
+                        text-align: left;
+                    }
+                }
+            }
+
+            .form_controllers {
+                @include flex-between;
+            }
+        }
+    }
+}
