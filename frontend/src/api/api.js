@@ -198,3 +198,33 @@ export const cancelRequest = async (requestId) => {
     throw new Error(error.response?.data?.message || 'Ошибка при отзыве заявки');
   }
 };
+
+//активные откликик у волонтера
+
+export const getVolunteerResponses = async () => {
+  try {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      throw new Error('Токен авторизации отсутствует.');
+    }
+
+    const response = await axios.get(
+      `${API_URL}/VolunteerPersonalAccount/VolunteerPersonalAccount/responses`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      }
+    );
+
+    return response.data; // Возвращаем данные из ответа
+  } catch (error) {
+    console.error('Ошибка при получении откликов:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config
+    });
+    throw new Error(error.response?.data?.message || 'Ошибка при получении откликов');
+  }
+};

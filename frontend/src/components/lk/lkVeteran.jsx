@@ -8,7 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Button } from 'primereact/button';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createVeteranRequest, getVeteranRequests, getVolunteerRequests, respondToRequest, selectVolunteer, cancelRequest } from '../../api/api';
+import { createVeteranRequest, getVeteranRequests, getVolunteerRequests, respondToRequest, selectVolunteer, cancelRequest, getVolunteerResponses } from '../../api/api';
 import s from './lk.module.scss'
 
 const CreateBid = () => {
@@ -135,21 +135,21 @@ const CreateBid = () => {
     );
 };
 
-const Bid = ({ bid, bidType, user }) => {
+const Bid = ({ bid, bidType, user, itResponse }) => {
 
     // Функция для выбора исполнителя
-  const handleSelectVolunteer = async (responseId) => {
-    try {
-      // Передаем ID отклика
-      await selectVolunteer(responseId);
+    const handleSelectVolunteer = async (responseId) => {
+        try {
+            // Передаем ID отклика
+            await selectVolunteer(responseId);
 
-      // Выводим сообщение об успехе
-      alert('Исполнитель успешно выбран!');
-    } catch (error) {
-      console.error('Ошибка при выборе исполнителя:', error);
-      alert('Не удалось выбрать исполнителя. Попробуйте позже.');
-    }
-  };
+            // Выводим сообщение об успехе
+            alert('Исполнитель успешно выбран!');
+        } catch (error) {
+            console.error('Ошибка при выборе исполнителя:', error);
+            alert('Не удалось выбрать исполнителя. Попробуйте позже.');
+        }
+    };
 
     const handleRespond = async () => {
         try {
@@ -172,14 +172,14 @@ const Bid = ({ bid, bidType, user }) => {
 
     const handleCancelRequest = async () => {
         try {
-          // Передаем ID заявки
-          await cancelRequest(bid.id);
-    
-          // Выводим сообщение об успехе
-          alert('Заявка успешно отозвана!');
+            // Передаем ID заявки
+            await cancelRequest(bid.id);
+
+            // Выводим сообщение об успехе
+            alert('Заявка успешно отозвана!');
         } catch (error) {
-          console.error('Ошибка при отзыве заявки:', error);
-          alert('Не удалось отозвать заявку. Попробуйте позже.');
+            console.error('Ошибка при отзыве заявки:', error);
+            alert('Не удалось отозвать заявку. Попробуйте позже.');
         }
     };
 
@@ -206,28 +206,31 @@ const Bid = ({ bid, bidType, user }) => {
 
             {/* игорь вот эту темку поправишь */}
             {bidType == 'veteran' && !bid.volunteerSelect ? (
-                bid.responses.map((item, key) =>(
-                <>
-                    <div key={key}>{item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
-                    <Button label="Выбрать исполнителя" onClick={() => handleSelectVolunteer(item.id)}/>
-                </>
-                ))) :(
-                    bid.responses.map((item, key) =>(
-                        <>
-                            <div key={key}> Выбран исполнитель {item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
-                        </> 
-                ))
+                bid.responses.map((item, key) => (
+                    <>
+                        <div key={key}>{item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
+                        <Button label="Выбрать исполнителя" onClick={() => handleSelectVolunteer(item.id)} />
+                    </>
+                ))) : (
+
+                // bid.responses.map((item, key) =>(
+                //     <>
+                //         <div key={key}> Выбран исполнитель {item.firstName} {item.lastName} {item.contactInfo} {item.id}</div>
+                //     </> 
+                <div>ffgd</div>
+                // ))
+
             )}
             {
                 bidType === 'veteran' && bid.status !== 'Завершена' && (
                     <div className={s.form_controllers}>
-                        <Button label="Отозвать заявку" severity="danger" raised  onClick={handleCancelRequest}/>
+                        <Button label="Отозвать заявку" severity="danger" raised onClick={handleCancelRequest} />
                         <Button label="Завершить" severity="success" raised />
                     </div>
                 )
             }
             {
-                bidType == "volunteer" && bid.status == "Новая" && (
+                bidType == "volunteer" && bid.status == "Новая" && !itResponse && (
                     <Button label="Откликнуться" severity="success" onClick={handleRespond} />
                 )
             }
@@ -264,10 +267,10 @@ const LkVeteran = () => {
                     createdAt: request.createAt,
                     responses: request.responses,
                     volunteerSelect: request.selectedExecutorId
-                    
+
                 }));
 
-            
+
                 setBidsVeteran(formattedBids); // Обновляем состояние
             } catch (error) {
                 console.error('Не удалось загрузить заявки:', error);
@@ -305,58 +308,46 @@ const LkVeteran = () => {
 
     }, []);
 
-    // const veteran = {
-    //     firstName: "Сергей",
-    //     lastName: "Петров",
-    //     login: "petrov_sergey",
-    //     city: "Псков"
-    // }
+    //получение активных заявок у волонтера
+    const [responses, setResponses] = useState([]); // Состояние для хранения откликов
+    const [loading, setLoading] = useState(true); // Состояние загрузки
+    const [error, setError] = useState(null); // Состояние ошибки
 
-    // const volunteer = {
-    //     firstName: "Иван",
-    //     lastName: "Иванов",
-    //     login: "ivan_123",
-    //     city: "Псков"
-    // }
+    // Получение откликов при монтировании компонента
+    useEffect(() => {
+        const fetchResponses = async () => {
+            try {
+                setLoading(true);
+                const data = await getVolunteerResponses();
+                const formattedData = data.map(request => ({
+                    id: request.guid,
+                    type: request.type === 1 ? 'Медицинская помощь' :
+                        request.type === 2 ? 'Помощь с транспортом' :
+                            request.type === 3 ? 'Психологическая поддержка' :
+                                request.type === 4 ? 'Другое' : 'Неизвестный тип',
+                    description: request.description,
+                    from: request.city + " " + request.locationText,
+                    status: request.status === 1 ? 'Новая' :
+                        request.status === 2 ? 'Выполняется' :
+                            request.status === 3 ? 'Завершена' :
+                                request.status === 4 ? 'Отменена' : 'Неизвестный статус',
+                    createdAt: request.createAt,
+                    veteran: request.veteran
+                }));
+                console.log(formattedData)
+                setResponses(formattedData); // Сохраняем данные в состояние
+                setLoading(false);
+            } catch (error) {
+                console.error('Ошибка при загрузке откликов:', error);
+                setError('Не удалось загрузить отклики. Попробуйте позже.');
+                setLoading(false);
+            }
+  
+        };
+        fetchResponses();
+    }, []);
 
-    // let user = {};
 
-    // if (userType === "veteran"){
-    //     user = veteran;
-    // } else if (userType === "volunteer"){
-    //     user = volunteer;
-    // }
-
-    // const bids = [
-    //     {
-    //         type: 'Медицинская помощь',
-    //         description: 'Не могу ходить, нужна помощь врачей',
-    //         from: 'Псков, ул Ленина д 5 кв 10',
-    //         status: 'Завершена',
-    //         createdAt: '01-04-2025',
-    //     },
-    //     {
-    //         type: 'Помощь с транспортом',
-    //         description: 'Хочу навестить родственников из Москвы, но в связи с болезнью не могу поехать на поезде, требуется специальный автомобиль.',
-    //         from: 'Псков, ул Ленина д 5 кв 1488',
-    //         status: 'Выполняется',
-    //         createdAt: '10-04-2025',
-    //     },
-    //     {
-    //         type: 'Психологическая поддержка',
-    //         description: 'Скучно одному, приходите расскажу интересные истории',
-    //         from: 'Псков, ул Ленина д 5 кв 1488',
-    //         status: 'Новая',
-    //         createdAt: '01-04-2025',
-    //     },
-    //     {
-    //         type: 'Другое',
-    //         description: 'Нужна помощь с поиском друга-ветерана',
-    //         from: 'Тула, ул Ленина д 5 кв 1488',
-    //         status: 'Новая',
-    //         createdAt: '10-04-2025',
-    //     }
-    // ]
 
     return (
         <section className={s.container}>
@@ -382,6 +373,18 @@ const LkVeteran = () => {
                         {bidsVolunteer.map((item, key) => {
                             if (item.status == 'Новая') {
                                 return (<Bid bid={item} key={key} bidType={userType} user={userData} />)
+                            }
+                        })}
+                    </div>
+                </>
+            )}
+            {userType == "volunteer" && responses && (
+                <>
+                    <h2>Мои отклики</h2>
+                    <div className={s.bids}>
+                        {responses.map((item, key) => {
+                            if (item.status == 'Новая') {
+                                return (<Bid bid={item} key={key} bidType={userType} user={userData} itResponse={true}/>)
                             }
                         })}
                     </div>
