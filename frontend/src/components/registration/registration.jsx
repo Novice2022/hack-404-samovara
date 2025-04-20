@@ -67,7 +67,9 @@ const Registration = () => {
       
         try {
           await registerUser(userData);
-
+          // Сохраняем данные пользователя в localStorage
+          const userKey = `user-${fields.login.value}`; // Уникальный ключ для каждого пользователя
+          localStorage.setItem(userKey, JSON.stringify(userData));
           setMessage({ text: 'Регистрация успешна! Войдите в систему', type: 'success' });
           setActive(false);
           setFields(prev => ({
@@ -92,14 +94,17 @@ const Registration = () => {
             login: fields.login.value,
             passwordHash: hashedPassword
           });
-      
+            // Извлекаем данные пользователя из localStorage
+          const userKey = `user-${fields.login.value}`;
+          const storedUserData = JSON.parse(localStorage.getItem(userKey));
+
           localStorage.setItem('authToken', token);
           localStorage.setItem('userData', JSON.stringify(user));
           navigate('/lk', { 
             state: { 
               userType: userType,
               justLoggedIn: true ,
-              userInfo: userData
+              userInfo: storedUserData
             }
           });
         } catch (error) {

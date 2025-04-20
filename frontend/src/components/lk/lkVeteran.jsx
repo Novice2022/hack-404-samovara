@@ -353,7 +353,7 @@ const LkVeteran = () => {
         <section className={s.container}>
             <div className={s.info}>
                 <p>{userData.lastName + " " + userData.firstName}</p>
-                <p>{userTypeRu} из города {userData.city}</p>
+                <p>{userTypeRu} из города {userData.cityResidence}</p>
             </div>
             {userType == "veteran" && (
                 <>
