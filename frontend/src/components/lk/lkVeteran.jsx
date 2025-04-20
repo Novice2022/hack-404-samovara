@@ -219,7 +219,7 @@ const Bid = ({ bid, bidType, user }) => {
                 ))
             )}
             {
-                bidType === 'veteran' && bid.status !== 'Завершена' && (
+                bidType === 'veteran' && !(['Завершена', 'Отменена'].includes(bid.status)) && (
                     <div className={s.form_controllers}>
                         <Button label="Отозвать заявку" severity="danger" raised  onClick={handleCancelRequest}/>
                         <Button label="Завершить" severity="success" raised />
@@ -278,7 +278,6 @@ const LkVeteran = () => {
             try {
                 const data2 = await getVolunteerRequests(); // Вызываем метод для получения заявок
 
-
                 const formattedBids = data2.map(request => ({
                     id: request.guid,
                     type: request.type === 1 ? 'Медицинская помощь' :
@@ -304,59 +303,6 @@ const LkVeteran = () => {
         userType === "veteran" ? fetchRequestsVeteran() : fetchRequestsVolunteer()
 
     }, []);
-
-    // const veteran = {
-    //     firstName: "Сергей",
-    //     lastName: "Петров",
-    //     login: "petrov_sergey",
-    //     city: "Псков"
-    // }
-
-    // const volunteer = {
-    //     firstName: "Иван",
-    //     lastName: "Иванов",
-    //     login: "ivan_123",
-    //     city: "Псков"
-    // }
-
-    // let user = {};
-
-    // if (userType === "veteran"){
-    //     user = veteran;
-    // } else if (userType === "volunteer"){
-    //     user = volunteer;
-    // }
-
-    // const bids = [
-    //     {
-    //         type: 'Медицинская помощь',
-    //         description: 'Не могу ходить, нужна помощь врачей',
-    //         from: 'Псков, ул Ленина д 5 кв 10',
-    //         status: 'Завершена',
-    //         createdAt: '01-04-2025',
-    //     },
-    //     {
-    //         type: 'Помощь с транспортом',
-    //         description: 'Хочу навестить родственников из Москвы, но в связи с болезнью не могу поехать на поезде, требуется специальный автомобиль.',
-    //         from: 'Псков, ул Ленина д 5 кв 1488',
-    //         status: 'Выполняется',
-    //         createdAt: '10-04-2025',
-    //     },
-    //     {
-    //         type: 'Психологическая поддержка',
-    //         description: 'Скучно одному, приходите расскажу интересные истории',
-    //         from: 'Псков, ул Ленина д 5 кв 1488',
-    //         status: 'Новая',
-    //         createdAt: '01-04-2025',
-    //     },
-    //     {
-    //         type: 'Другое',
-    //         description: 'Нужна помощь с поиском друга-ветерана',
-    //         from: 'Тула, ул Ленина д 5 кв 1488',
-    //         status: 'Новая',
-    //         createdAt: '10-04-2025',
-    //     }
-    // ]
 
     return (
         <section className={s.container}>
