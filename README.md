@@ -1,8 +1,8 @@
-# Как какать
+# HOWTO
 
 ## Клонирование репозитория (пока так)
 
-### Для бэкендеров
+### Backend
 
 ``` shell
 git clone https://github.com/Novice2022/hack-404-samovara.git
@@ -18,7 +18,7 @@ git branch --set-upstream-to=origin/backend backend
 git pull
 ```
 
-### Для фронтендеров
+### Frontend
 
 ``` shell
 git clone https://github.com/Novice2022/hack-404-samovara.git
