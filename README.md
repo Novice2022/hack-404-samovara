@@ -2,9 +2,7 @@
 
 ## Клонирование репозитория (пока так)
 
-### Backend
-
-``` shell
+``` bash
 git clone https://github.com/Novice2022/hack-404-samovara.git
 
 cd hack-404-samovara
@@ -12,7 +10,11 @@ cd hack-404-samovara
 git checkout -b dev
 git branch --set-upstream-to=origin/dev dev
 git pull
+```
 
+### Backend
+
+``` bash
 git checkout -b backend
 git branch --set-upstream-to=origin/backend backend
 git pull
@@ -20,15 +22,7 @@ git pull
 
 ### Frontend
 
-``` shell
-git clone https://github.com/Novice2022/hack-404-samovara.git
-
-cd hack-404-samovara
-
-git checkout -b dev
-git branch --set-upstream-to=origin/dev dev
-git pull
-
+``` bash
 git checkout -b frontend
 git branch --set-upstream-to=origin/frontend frontend
 git pull
@@ -52,13 +46,12 @@ docker compose up -d
 
 ## Разворачивание бэка
 
-``` shell
+``` bash
 sudo apt update && sudo apt install -y wget
 wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 
-sudo apt update
 sudo apt install -y dotnet-sdk-8.0
 
 cd ./backend/Hackaton/
@@ -69,7 +62,7 @@ dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.0
 
 Копируем файл `appsettings.json` в папку Hackaton.
 
-``` shell
+``` bash
 docker run -d -p 5432:5432 --name my_postgres \
   -e POSTGRES_USER=user \
   -e POSTGRES_PASSWORD=12345 \
